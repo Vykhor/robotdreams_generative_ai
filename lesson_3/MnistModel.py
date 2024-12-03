@@ -5,7 +5,11 @@ from torch.utils.data import DataLoader
 from torch.utils.data import TensorDataset
 import pandas as pd
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+from ConfusionMatrix import plot_confusion_matrix
+from LossAndAccuracy import plot_loss_and_accuracy
+
+device = torch.device("xpu" if torch.xpu.is_available() else "cpu")
+print(f"Використовується пристрій: {device}")
 
 # завантаження відфільтрованих даних
 def load_dataset_csv(file_path):
@@ -21,30 +25,37 @@ test_data = load_dataset_csv("test_data.csv")
 # параметри
 input_size = training_data[0][0].numel()  # 784
 output_classes_number = len(set(label.item() for _, label in training_data))  # 10
-hidden_features = 392
-batch_size = 32
-learning_rate = 0.2
-num_epochs = 5
+hidden_features = 128
+batch_size = 128
+learning_rate = 0.001
+num_epochs = 3
+dropout = 0.3
+weight_decay = 0.0001
 
 # створення класу моделі
 class MnistModel(nn.Module):
   def __init__(self, input_size, output_classes_number):
     super(MnistModel, self).__init__()
     self.input = nn.Linear(input_size, hidden_features)
-    self.relu1 = nn.ReLU()
-    self.hidden = nn.Linear(hidden_features, hidden_features)
-    self.relu2 = nn.ReLU()
+    self.relu = nn.ReLU()
+    self.hidden1 = nn.Linear(hidden_features, hidden_features)
+    self.hidden2 = nn.Linear(hidden_features, hidden_features)
+    #self.hidden3 = nn.Linear(hidden_features, hidden_features)
     self.output = nn.Linear(hidden_features, output_classes_number)
-    self.softmax = nn.Softmax(dim=1)
+    self.dropout = nn.Dropout(dropout)
 
   def forward(self, x):
     x = x.view(x.size(0), -1)
     x = self.input(x)
-    x = self.relu1(x)
-    x = self.hidden(x)
-    x = self.relu2(x)
+    x = self.relu(x)
+    x = self.hidden1(x)
+    x = self.dropout(x)
+    x = self.relu(x)
+    x = self.hidden2(x)
+    #x = self.dropout(x)
+    #x = self.relu(x)
+    #x = self.hidden3(x)
     x = self.output(x)
-    x = self.softmax(x)
     return x
 
 # створення моделі
@@ -56,8 +67,8 @@ train_loader = DataLoader(training_data, batch_size=batch_size, shuffle=True)
 test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False)
 
 # функція втрат та оптимізатор
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=learning_rate)
+criterion = nn.CrossEntropyLoss() # має вбудовану функцію Softmax
+optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay) # оптимізатор з ваговою регуляризацією
 
 # списки для збереження даних для побудови графіку втрат і точності під час навчання
 train_losses = []
@@ -109,3 +120,6 @@ with torch.no_grad():
         correct += (predicted == labels).sum().item()
 
 print(f"Accuracy: {100 * correct / total:.2f}%")
+
+plot_confusion_matrix(model=model, test_loader=test_loader, device=device, training_data_classes=set(label.item() for _, label in training_data))
+plot_loss_and_accuracy(num_epochs=num_epochs, train_losses=train_losses, test_accuracies=test_accuracies)
