@@ -4,6 +4,7 @@ from torchvision import datasets
 from torchvision.transforms import ToTensor
 from torch.utils.data import TensorDataset
 import pandas as pd
+import numpy as np
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Використовується пристрій: {device}")
@@ -79,8 +80,8 @@ print(f"Кількість зображень у test_data після перев
 
 # збереження відфільтрованого dataset в CSV
 def save_dataset_csv(dataset, file_path):
-    images = [dataset[i][0].numpy().flatten() for i in range(len(dataset))]
-    labels = [dataset[i][1] for i in range(len(dataset))]
+    images = [dataset[i][0].numpy().astype(np.float32).flatten() for i in range(len(dataset))]
+    labels = [int(dataset[i][1]) for i in range(len(dataset))]
     df = pd.DataFrame(images)
     df['label'] = labels
     df.to_csv(file_path, index=False)
@@ -88,6 +89,3 @@ def save_dataset_csv(dataset, file_path):
 
 save_dataset_csv(training_data, "training_data.csv")
 save_dataset_csv(test_data, "test_data.csv")
-
-print(f"Дані training_data збережено до training_data.csv")
-print(f"Дані training_data збережено до test_data.csv")
