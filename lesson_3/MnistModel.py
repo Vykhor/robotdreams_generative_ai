@@ -1,15 +1,13 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import Dataset
-from torchvision import datasets
-from torchvision.transforms import ToTensor
 from torch.utils.data import DataLoader
 from torch.utils.data import TensorDataset
 import pandas as pd
 
-# завантаження відфільтрованих даних
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# завантаження відфільтрованих даних
 def load_dataset_csv(file_path):
     df = pd.read_csv(file_path)
     labels = torch.tensor(df['label'].values, dtype=torch.long)
