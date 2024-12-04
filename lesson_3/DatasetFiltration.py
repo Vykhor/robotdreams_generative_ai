@@ -6,7 +6,10 @@ from torch.utils.data import TensorDataset
 import pandas as pd
 import numpy as np
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device(
+    "cuda" if torch.cuda.is_available() 
+    else "xpu" if torch.xpu.is_available()
+    else "cpu")
 print(f"Використовується пристрій: {device}")
 
 # завантаження даних, перетворення у тензори, нормалізація
