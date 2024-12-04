@@ -35,10 +35,10 @@ print(f"Датасет розбито на батчі з розміром {p_bat
 p_input_size = training_data[0][0].numel()  # 784
 p_output_classes_number = len(set(label.item() for _, label in training_data))  # 10
 p_hidden_features = 512
-p_learning_rate = 0.0001
-p_num_epochs = 5
+p_learning_rate = 0.0005
+p_num_epochs = 50
 p_dropout = 0.3
-p_weight_decay = 0.00001
+p_weight_decay = 0.000001
 
 # створення моделі
 model = create_model(input_size=p_input_size, output_classes_number=p_output_classes_number, hidden_features=p_hidden_features, dropout=p_dropout).to(device)
@@ -68,23 +68,23 @@ for epoch in range(p_num_epochs):
     avg_train_loss = running_loss / len(train_loader)
     train_losses.append(avg_train_loss)
 
-    if epoch % 10 == 0:
-        model.eval()
-        correct = 0
-        total = 0
-        with torch.no_grad():
-            for images, labels in test_loader:
-                images, labels = images.to(device), labels.to(device)
-                outputs = model(images)
-                _, predicted = torch.max(outputs, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
 
-        accuracy = 100 * correct / total
-        accuracies.append(accuracy)
+    model.eval()
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for images, labels in test_loader:
+            images, labels = images.to(device), labels.to(device)
+            outputs = model(images)
+            _, predicted = torch.max(outputs, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
 
-        print(f"Epoch {epoch+1}/{p_num_epochs}, Loss: {avg_train_loss:.4f}, Accuracy: {accuracy:.2f}%")
-        model.train()
+    accuracy = 100 * correct / total
+    accuracies.append(accuracy)
+
+    print(f"Epoch {epoch+1}/{p_num_epochs}, Loss: {avg_train_loss:.4f}, Accuracy: {accuracy:.2f}%")
+    model.train()
 
 # оцінка моделі
 model.eval()
