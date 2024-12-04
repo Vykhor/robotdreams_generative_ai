@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 
-def plot_loss_and_accuracy(num_epochs, train_losses, test_accuracies):
+def plot_loss_and_accuracy(size, train_losses, test_accuracies):
     # Побудова графіків
-    epochs = range(1, num_epochs + 1)
+    epochs = range(1, size)
 
     # Графік втрат
     plt.figure(figsize=(12, 5))
@@ -15,7 +15,7 @@ def plot_loss_and_accuracy(num_epochs, train_losses, test_accuracies):
 
     # Графік точності
     plt.subplot(1, 2, 2)
-    plt.plot(epochs, test_accuracies, label="Test Accuracy", color="green")
+    plt.plot(epochs, test_accuracies, label="Accuracy", color="green")
     plt.xlabel("Epoch")
     plt.ylabel("Accuracy (%)")
     plt.title("Test Accuracy")
