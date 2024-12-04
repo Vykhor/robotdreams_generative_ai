@@ -58,7 +58,7 @@ for p_hidden_features, p_learning_rate, p_dropout, p_weight_decay in hyperparame
     # функція втрат та оптимізатор
     criterion = nn.CrossEntropyLoss() # має вбудовану функцію Softmax
     optimizer = optim.Adam(model.parameters(), lr=p_learning_rate, weight_decay=p_weight_decay) # оптимізатор з ваговою регуляризацією
-    print(f"Створено criterion CrossEntropyLoss та optimizer Adam з weight_decay = {p_weight_decay}")
+    print(f"Створено criterion CrossEntropyLoss та optimizer Adam з learning_rate={p_learning_rate} та weight_decay = {p_weight_decay}")
 
     # навчання моделі
     model.train()
@@ -87,6 +87,7 @@ for p_hidden_features, p_learning_rate, p_dropout, p_weight_decay in hyperparame
 
     val_accuracy = 100 * correct / total
     print(f"Accuracy: {val_accuracy:.2f}%")
+    print(f"------------------------------")
 
     if val_accuracy > best_accuracy:
         best_accuracy = val_accuracy

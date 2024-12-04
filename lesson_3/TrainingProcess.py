@@ -4,8 +4,9 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 import pandas as pd
 
-from ConfusionMatrix import plot_confusion_matrix
-from LossAndAccuracy import plot_loss_and_accuracy
+from lesson_3.plot.ConfusionMatrix import plot_confusion_matrix
+from lesson_3.plot.LossAndAccuracy import plot_loss_and_accuracy
+from lesson_3.plot.Predictions import plot_predictions
 from MnistModel import create_model
 
 device = torch.device("xpu" if torch.xpu.is_available() else "cpu")
@@ -101,3 +102,4 @@ print(f"Accuracy: {100 * correct / total:.2f}%")
 
 plot_confusion_matrix(model=model, test_loader=test_loader, device=device, training_data_classes=set(label.item() for _, label in training_data))
 plot_loss_and_accuracy(size=p_num_epochs+1, train_losses=train_losses, test_accuracies=accuracies)
+plot_predictions(model=model, test_loader=test_loader)
