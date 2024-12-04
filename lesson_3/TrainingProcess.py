@@ -9,7 +9,10 @@ from lesson_3.plot.LossAndAccuracy import plot_loss_and_accuracy
 from lesson_3.plot.Predictions import plot_predictions
 from MnistModel import create_model
 
-device = torch.device("xpu" if torch.xpu.is_available() else "cpu")
+device = torch.device(
+    "cuda" if torch.cuda.is_available() 
+    else "xpu" if torch.xpu.is_available()
+    else "cpu")
 print(f"Використовується пристрій: {device}")
 
 # підготовка даних
