@@ -42,16 +42,14 @@ test_loader = DataLoader(test_data, batch_size=p_batch_size, shuffle=False)
 print(f"Датасет розбито на батчі з розміром {p_batch_size}")
 
 # параметри
-p_input_size = training_data[0][0].numel()  # 784
 p_output_classes_number = len(set(label.item() for _, label in training_data))  # 10
-p_hidden_features = 512
 p_learning_rate = 0.0005
-p_num_epochs = 5
+p_num_epochs = 10
 p_dropout = 0.3
 p_weight_decay = 0.000001
 
 # створення моделі
-model = create_model(input_size=p_input_size, output_classes_number=p_output_classes_number, hidden_features=p_hidden_features, dropout=p_dropout).to(device)
+model = create_model(output_classes_number=p_output_classes_number, dropout=p_dropout).to(device)
 
 # функція втрат та оптимізатор
 criterion = nn.CrossEntropyLoss() # має вбудовану функцію Softmax
