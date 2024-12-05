@@ -1,8 +1,8 @@
 import torch.nn as nn
 
-class MnistModel(nn.Module):
+class MnistCNNModel(nn.Module):
   def __init__(self, input_size, output_classes_number, hidden_features, dropout):
-    super(MnistModel, self).__init__()
+    super(MnistCNNModel, self).__init__()
     self.input = nn.Linear(input_size, hidden_features)
     self.bn_input = nn.BatchNorm1d(hidden_features)
     self.relu = nn.ReLU()
@@ -49,6 +49,6 @@ class MnistModel(nn.Module):
     return x
 
 def create_model(input_size, output_classes_number, hidden_features, dropout):
-    model = MnistModel(input_size=input_size, output_classes_number=output_classes_number, hidden_features=hidden_features, dropout=dropout)
+    model = MnistCNNModel(input_size=input_size, output_classes_number=output_classes_number, hidden_features=hidden_features, dropout=dropout)
     print(f"Created model: {model}")
     return model

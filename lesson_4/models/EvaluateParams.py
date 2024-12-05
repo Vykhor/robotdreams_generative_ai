@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader, TensorDataset, random_split
 import pandas as pd
 import itertools
 
-from MnistModel import create_model
+from MnistCNNModel import create_model
 
 device = torch.device("xpu" if torch.xpu.is_available() else "cpu")
 print(f"Використовується пристрій: {device}")

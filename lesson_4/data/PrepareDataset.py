@@ -25,6 +25,13 @@ training_data = datasets.MNIST(
     root='./datasets',
     train=True,
     download=True,
+    transform=ToTensor()
+)
+
+augmented_data = datasets.MNIST(
+    root='./datasets',
+    train=True,
+    download=True,
     transform=train_transforms
 )
 
@@ -57,7 +64,9 @@ def filter_anomalies(data):
 def filter_data_types(data):
     valid_indices = []
     for i, (image, label) in enumerate(data):
-        if isinstance(image, torch.Tensor) and isinstance(label, int):
+        if isinstance(image, torch.Tensor) and (isinstance(label, int) or isinstance(label, torch.Tensor)):
+            if isinstance(label, torch.Tensor):  # якщо мітка є тензором (виникає після аугментації)
+                label = int(label.item())  # конвертація в int
             valid_indices.append(i)
         else:
             print(f"Некоректні типи даних у зображенні {i}: тип {type(image)} або мітки {type(label)}, видалено.")
@@ -80,6 +89,12 @@ training_data = filter_anomalies(training_data)
 training_data = filter_data_types(training_data)
 training_data = subset_to_dataset(training_data)
 
+print("Перевірка augmented_data")
+training_data = filter_missing_values(training_data)
+training_data = filter_anomalies(training_data)
+training_data = filter_data_types(training_data)
+training_data = subset_to_dataset(training_data)
+
 print("Перевірка test_data")
 test_data = filter_missing_values(test_data)
 test_data = filter_anomalies(test_data)
@@ -87,6 +102,7 @@ test_data = filter_data_types(test_data)
 test_data = subset_to_dataset(test_data)
 
 print(f"Кількість зображень у training_data після перевірки: {len(training_data)}")
+print(f"Кількість зображень у augmented_data після перевірки: {len(augmented_data)}")
 print(f"Кількість зображень у test_data після перевірки: {len(test_data)}")
 
 # збереження відфільтрованого dataset в CSV
@@ -98,5 +114,21 @@ def save_dataset_csv(dataset, file_path):
     df.to_csv(file_path, index=False)
     print(f"Датасет збережено у файл: {file_path}")
 
-save_dataset_csv(training_data, "../training_data.csv")
-save_dataset_csv(test_data, "../test_data.csv")
+# збереження двох відфільтрованих dataset в CSV
+def save_datasets_csv(first_dataset, second_dataset, file_path):
+    first_images = [first_dataset[i][0].numpy().astype(np.float32).flatten() for i in range(len(first_dataset))]
+    first_labels = [int(first_dataset[i][1]) for i in range(len(first_dataset))]
+
+    second_images = [second_dataset[i][0].numpy().astype(np.float32).flatten() for i in range(len(second_dataset))]
+    second_labels = [int(second_dataset[i][1]) for i in range(len(second_dataset))]
+
+    images = first_images + second_images
+    labels = first_labels + second_labels
+
+    df = pd.DataFrame(images)
+    df['label'] = labels
+    df.to_csv(file_path, index=False)
+    print(f"Обидва датасети збережено у файл: {file_path}")
+
+save_datasets_csv(training_data, augmented_data, "../datasets/training_data.csv")
+save_dataset_csv(test_data, "../datasets/test_data.csv")
