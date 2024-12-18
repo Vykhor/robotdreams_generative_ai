@@ -28,7 +28,7 @@ def evaluate_model(model, dataset, tokenizer, device):
                 num_beams=4,
                 early_stopping=True
             )
-            generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+            generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True).replace("<pad>", "").strip()
             reference_text = tokenizer.decode(labels[0], skip_special_tokens=True)
 
             predictions.append(generated_text)

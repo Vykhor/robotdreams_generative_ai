@@ -15,9 +15,9 @@ print(f"Використовується пристрій: {device}")
 
 # Параметри
 model_name = "t5-small"
-learning_rate = 1e-4
-batch_size = 8
-epochs = 3
+learning_rate = 1e-5
+batch_size = 16
+epochs = 4
 
 # Токенізатор
 tokenizer = T5Tokenizer.from_pretrained(model_name)
@@ -33,7 +33,7 @@ optimizer = AdamW(model.parameters(), lr=learning_rate)
 squad_v2_dataset = load_from_disk("tokenized_squad_v2")
 print("Датасет tokenized_squad_v2 завантажено з диска")
 
-train_dataset = squad_v2_dataset["train"]
+train_dataset = squad_v2_dataset["train"].select(range(10000))
 validation_dataset = squad_v2_dataset["validation"]
 
 data_collator = DataCollatorWithPadding(tokenizer=tokenizer, padding="longest")
@@ -80,16 +80,17 @@ for epoch in range(epochs):
                     num_beams=4,
                     early_stopping=True
                 )
-                generated_text = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
+                generated_text = tokenizer.decode(generated_ids[0], skip_special_tokens=True).replace("<pad>", "").strip()
                 reference_text = tokenizer.decode(labels[0], skip_special_tokens=True)
 
                 print(f"Generated: {generated_text}")
                 print(f"Reference: {reference_text}")
 
                 # Обчислення BLEU і ROUGE
-                bleu_score = bleu.compute(predictions=[generated_text], references=[[reference_text]])
-                rouge_score = rouge.compute(predictions=[generated_text], references=[reference_text])
-                print(f"BLEU: {bleu_score['bleu']}, ROUGE-L: {rouge_score['rougeL']}")
+                if len(generated_text) != 0 and len(reference_text) != 0:
+                    bleu_score = bleu.compute(predictions=[generated_text], references=[[reference_text]])
+                    rouge_score = rouge.compute(predictions=[generated_text], references=[reference_text])
+                    print(f"BLEU: {bleu_score['bleu']}, ROUGE-L: {rouge_score['rougeL']}")
             model.train()
 
     avg_loss = total_loss / len(train_dataloader)
