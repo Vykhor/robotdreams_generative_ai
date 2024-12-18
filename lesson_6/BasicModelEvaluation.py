@@ -1,32 +1,40 @@
 import evaluate
+import torch
+from datasets import load_from_disk
+from transformers import T5Tokenizer, T5ForConditionalGeneration
 
-def generate_text(model, tokenizer, input_ids, attention_mask):
-    generated_ids = model.generate(input_ids=input_ids, attention_mask=attention_mask, max_length=50)
-    generated_text = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
-    return generated_text
-
-def evaluate_model(model, tokenizer, dataset, device):
+# Функція для оцінки моделі за BLEU та ROUGE
+def evaluate_model(model, dataset, tokenizer, device):
+    # Метрики
     bleu = evaluate.load("bleu")
     rouge = evaluate.load("rouge")
 
     predictions = []
     references = []
 
-    for example in dataset:
-        question = example["question"]
-        context = example["context"]
-        input_text = f"Question: {question}\nContext: {context}\nAnswer:"
+    model.eval()
+    with torch.no_grad():
+        for example in dataset:
 
-        inputs = tokenizer(input_text, return_tensors="pt", padding=True, truncation=True, max_length=512)
-        input_ids = inputs["input_ids"].to(device)
-        attention_mask = inputs["attention_mask"].to(device)
+            input_ids = torch.tensor(example["input_ids"]).unsqueeze(0).to(device)
+            attention_mask = torch.tensor(example["attention_mask"]).unsqueeze(0).to(device)
+            labels = torch.tensor(example["labels"]).unsqueeze(0).to(device)
 
-        generated_text = generate_text(model, tokenizer, input_ids, attention_mask)
-        reference_text = example["answers"]["text"][0]  # Візьмемо першу відповідь
+            # Генерація тексту
+            outputs = model.generate(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                max_length=128,
+                num_beams=4,
+                early_stopping=True
+            )
+            generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+            reference_text = tokenizer.decode(labels[0], skip_special_tokens=True)
 
-        predictions.append(generated_text)
-        references.append([reference_text])
+            predictions.append(generated_text)
+            references.append([reference_text])
 
+    # Обчислення BLEU і ROUGE
     bleu_score = bleu.compute(predictions=predictions, references=references)
     rouge_score = rouge.compute(predictions=predictions, references=references)
 

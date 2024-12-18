@@ -9,22 +9,25 @@ tokenizer.pad_token = tokenizer.eos_token
 def preprocess_function(examples):
     # Формуємо вхідний текст для T5: завдання + питання + контекст
     inputs = [f"question: {q}  context: {c}" for q, c in zip(examples["question"], examples["context"])]
+
     # Вихідний текст — це правильна відповідь
     targets = examples["answers"]
 
     # Токенізуємо вхідний текст (inputs)
     model_inputs = tokenizer(
         inputs,
-        padding="max_length",  # Паддинг до максимальної довжини
+        padding="max_length",
         truncation=True,
         max_length=128
     )
 
     # Токенізуємо вихідний текст (targets)
     # Беремо першу відповідь зі списку 'answers' як ground truth
+    answers = [ans["text"][0] if len(ans["text"]) > 0 else "" for ans in targets]
+
     with tokenizer.as_target_tokenizer():
         labels = tokenizer(
-            [ans["text"][0] if len(ans["text"]) > 0 else "" for ans in targets],
+            answers,
             padding="max_length",
             truncation=True,
             max_length=128
@@ -32,10 +35,6 @@ def preprocess_function(examples):
 
     # Додаємо мітки до результатів
     model_inputs["labels"] = labels["input_ids"]
-    model_inputs["labels"] = [
-        [label if label != tokenizer.pad_token_id else -100 for label in label_ids]
-        for label_ids in model_inputs["labels"]
-    ]
 
     return model_inputs
 
@@ -51,3 +50,4 @@ tokenized_dataset = squad_v2.map(
 tokenized_dataset.save_to_disk("../tokenized_squad_v2")
 
 print("Розділені токенізовані дані збережено на диск")
+print(tokenized_dataset["train"].column_names)
