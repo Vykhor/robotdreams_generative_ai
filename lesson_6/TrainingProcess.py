@@ -1,13 +1,11 @@
 import torch
-import evaluate
 from torch.nn.utils import clip_grad_norm_
 from torch.optim import AdamW
-from datasets import load_from_disk
 from torch.utils.data import DataLoader
-from transformers import T5Tokenizer, T5ForConditionalGeneration, DataCollatorWithPadding
+from datasets import load_from_disk
+from transformers import T5Tokenizer, T5ForConditionalGeneration, DataCollatorWithPadding, get_scheduler
 from datetime import datetime
-from lesson_6.BasicModelEvaluation import evaluate_model
-from transformers import get_scheduler
+from lesson_6.ModelEvaluation import evaluate_model, evaluate_metrics, generate_example
 
 device = torch.device(
     "cuda" if torch.cuda.is_available()
@@ -51,10 +49,6 @@ lr_scheduler = get_scheduler(
     name="linear", optimizer=optimizer, num_warmup_steps=0, num_training_steps=num_training_steps
 )
 
-# Метрики
-bleu = evaluate.load("bleu")
-rouge = evaluate.load("rouge")
-
 print("Cтворено даталоадери")
 
 # Навчання
@@ -83,28 +77,16 @@ for epoch in range(epochs):
         total_loss += loss.item()
 
         # Генерація тексту для прикладу
-        if batch_idx % 100 == 0:
-            model.eval()
-            with torch.no_grad():
-                generated_ids = model.generate(
-                    input_ids=input_ids[:1],  # Перший приклад з батчу
-                    attention_mask=attention_mask[:1],
-                    max_length=128,
-                    num_beams=4,
-                    early_stopping=True
-                )
-                generated_text = tokenizer.decode(generated_ids[0], skip_special_tokens=True).replace("<pad>", "").strip()
-                reference_text = tokenizer.decode(labels[0], skip_special_tokens=True)
-
-                print(f"Generated: {generated_text}")
-                print(f"Reference: {reference_text}")
-
-                # Обчислення BLEU і ROUGE
-                if len(generated_text) != 0 and len(reference_text) != 0:
-                    bleu_score = bleu.compute(predictions=[generated_text], references=[[reference_text]])
-                    rouge_score = rouge.compute(predictions=[generated_text], references=[reference_text])
-                    print(f"BLEU: {bleu_score['bleu']}, ROUGE-L: {rouge_score['rougeL']}")
-            model.train()
+        if batch_idx % 10 == 0:
+            generated_text, reference_text = generate_example(model=model,
+                                                              tokenizer=tokenizer,
+                                                              input_ids=input_ids,
+                                                              attention_mask=attention_mask,
+                                                              labels=labels)
+            print(f"Generated: {generated_text}")
+            print(f"Reference: {reference_text}")
+            bleu_score, rouge_score = evaluate_metrics([generated_text], [reference_text])
+            print(f"BLEU: {bleu_score['bleu']}, ROUGE-L: {rouge_score['rougeL']}")
 
     avg_loss = total_loss / len(train_dataloader)
     print(f"Епоха {epoch + 1} завершена, середні втрати: {avg_loss:.4f}")
@@ -116,3 +98,5 @@ basic_bleu_score, basic_rouge_score = evaluate_model(basic_model, validation_dat
 print(f"Basic. BLEU: {basic_bleu_score['bleu']}, ROUGE-L: {basic_rouge_score['rougeL']}")
 bleu_score, rouge_score = evaluate_model(model, validation_dataset, tokenizer, device)
 print(f"Trained. BLEU: {bleu_score['bleu']}, ROUGE-L: {rouge_score['rougeL']}")
+
+
