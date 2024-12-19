@@ -1,7 +1,5 @@
 import evaluate
 import torch
-from datasets import load_from_disk
-from transformers import T5Tokenizer, T5ForConditionalGeneration
 
 # Функція для оцінки моделі за BLEU та ROUGE
 def evaluate_model(model, dataset, tokenizer, device):
