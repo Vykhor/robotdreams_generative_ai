@@ -1,0 +1,57 @@
+# Параметри
+model_name = "t5-small"
+learning_rate = 3e-5
+weight_decay = 0.01
+batch_size = 16
+epochs = 5
+
+train data: Dataset({
+    features: ['input_ids', 'attention_mask', 'labels'],
+    num_rows: 26279
+})
+validation data: Dataset({
+    features: ['input_ids', 'attention_mask', 'labels'],
+    num_rows: 10570
+})
+Оцінка моделі на валідаційному датасеті:
+Basic. BLEU: 0.40041573008234294, ROUGE-L: 0.5852724603027507
+
+--------------------------------------------
+Епоха 1 завершена, середні втрати: 0.0521
+
+Generated: weekly schedules
+Reference: weekday schedules
+
+Валідаційні втрати: 0.0628
+Нова найкраща модель!
+--------------------------------------------
+
+Епоха 2 завершена, середні втрати: 0.0368
+
+Generated: Tom Parsons
+Reference: Tom Parsons
+
+Валідаційні втрати: 0.0597
+Нова найкраща модель!
+--------------------------------------------
+
+Епоха 3 завершена, середні втрати: 0.0342
+
+Generated: Justin Guarini
+Reference: Justin Guarini
+
+Валідаційні втрати: 0.0598
+Покращення не відбулося (1/2)
+--------------------------------------------
+
+Епоха 4 завершена, середні втрати: 0.0322
+
+Generated: On the fourteenth and fifteenth centuries
+Reference: fourteenth and fifteenth centuries
+
+Валідаційні втрати: 0.0603
+Покращення не відбулося (2/2)
+Рання зупинка.
+
+Оцінка моделі на валідаційному датасеті:
+Trained. BLEU: 0.40090159821632837, ROUGE-L: 0.5865359549987943

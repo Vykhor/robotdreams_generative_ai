@@ -1,0 +1,66 @@
+# Параметри
+model_name = "t5-small"
+learning_rate = 5e-6
+weight_decay = 0.01
+batch_size = 16
+epochs = 5
+
+train data: Dataset({
+    features: ['input_ids', 'attention_mask', 'labels'],
+    num_rows: 26279
+})
+validation data: Dataset({
+    features: ['input_ids', 'attention_mask', 'labels'],
+    num_rows: 10570
+})
+Оцінка моделі на валідаційному датасеті:
+Basic. BLEU: 0.40041573008234294, ROUGE-L: 0.5852724603027507
+
+--------------------------------------------
+Епоха 1 завершена, середні втрати: 0.0769
+
+Generated: Animism
+Reference: Animism.
+
+Валідаційні втрати: 0.0653
+Нова найкраща модель!
+--------------------------------------------
+
+Епоха 2 завершена, середні втрати: 0.0398
+
+Generated: 1100
+Reference: 1100
+
+Валідаційні втрати: 0.0616
+Нова найкраща модель!
+--------------------------------------------
+
+Епоха 3 завершена, середні втрати: 0.0385
+
+Generated: river valleys
+Reference: Rio Grande Valley and the Conchos River Valley
+
+Валідаційні втрати: 0.0611
+Нова найкраща модель!
+--------------------------------------------
+
+Епоха 4 завершена, середні втрати: 0.0378
+
+Generated: CFB Gagetown
+Reference: CFB Gagetown, CFB Montreal and CFB Wainwright.
+
+Валідаційні втрати: 0.0609
+Нова найкраща модель!
+--------------------------------------------
+
+Епоха 5 завершена, середні втрати: 0.0374
+
+Generated: the US Congress
+Reference: the US Congress
+
+Валідаційні втрати: 0.0608
+Нова найкраща модель!
+--------------------------------------------
+
+Оцінка моделі на валідаційному датасеті:
+Trained. BLEU: 0.40557767122365895, ROUGE-L: 0.588155633223467

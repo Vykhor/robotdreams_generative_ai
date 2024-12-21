@@ -1,7 +1,9 @@
 from datasets import load_dataset
 from transformers import T5Tokenizer
 
-squad_v2 = load_dataset("squad_v2")
+dataset = load_dataset("squad")
+#dataset = load_dataset("squad_v2")
+#dataset = load_dataset("narrativeqa")
 tokenizer = T5Tokenizer.from_pretrained("t5-small")
 tokenizer.pad_token = tokenizer.eos_token
 
@@ -40,14 +42,14 @@ def preprocess_function(examples):
 
 
 # Токенізуємо датасет з використанням `map`
-tokenized_dataset = squad_v2.map(
+tokenized_dataset = dataset.map(
     preprocess_function,
     batched=True,
-    remove_columns=squad_v2["train"].column_names
+    remove_columns=dataset["train"].column_names
 )
 
 # Зберігаємо токенізований датасет на диск
-tokenized_dataset.save_to_disk("../tokenized_squad_v2")
+tokenized_dataset.save_to_disk("../tokenized_dataset")
 
 print("Розділені токенізовані дані збережено на диск")
 print(tokenized_dataset["train"].column_names)

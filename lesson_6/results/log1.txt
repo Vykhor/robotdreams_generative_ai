@@ -1,0 +1,62 @@
+# Параметри
+model_name = "t5-small"
+learning_rate = 1e-5
+weight_decay = 0.01
+batch_size = 16
+epochs = 5
+
+train data: Dataset({
+    features: ['input_ids', 'attention_mask', 'labels'],
+    num_rows: 26279
+})
+validation data: Dataset({
+    features: ['input_ids', 'attention_mask', 'labels'],
+    num_rows: 10570
+})
+Оцінка моделі на валідаційному датасеті:
+Basic. BLEU: 0.40041573008234294, ROUGE-L: 0.5852724603027507
+
+--------------------------------------------
+Епоха 1 завершена, середні втрати: 0.0623
+
+Generated: alga genomes
+Reference: alga genomes containing genes of bacterial origin
+
+Валідаційні втрати: 0.0642
+Нова найкраща модель!
+--------------------------------------------
+Епоха 2 завершена, середні втрати: 0.0386
+
+Generated: Merovingian
+Reference: Merovingian
+
+Валідаційні втрати: 0.0606
+Нова найкраща модель!
+--------------------------------------------
+Епоха 3 завершена, середні втрати: 0.0371
+
+Generated: Abuubakar-As-Saddique Mosque
+Reference: the Abuubakar-As-Saddique Mosque
+
+Валідаційні втрати: 0.0603
+Нова найкраща модель!
+--------------------------------------------
+Епоха 4 завершена, середні втрати: 0.0362
+
+Generated: Professor Henry Higgins
+Reference: Professor Henry Higgins
+
+Валідаційні втрати: 0.0603
+Нова найкраща модель!
+--------------------------------------------
+Епоха 5 завершена, середні втрати: 0.0356
+
+Generated: allele specifying tall stems in pea plants
+Reference: germ cells
+
+Валідаційні втрати: 0.0602
+Нова найкраща модель!
+--------------------------------------------
+
+Оцінка моделі на валідаційному датасеті:
+Trained. BLEU: 0.4016212850157403, ROUGE-L: 0.5880657961056651
