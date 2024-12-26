@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 
-from lesson_7.data.PrepareDataset import load_dataset_csv
+from lesson_7.data.Dataset import load_dataset_csv
 from lesson_7.model.Discriminator import create_discriminator
 from lesson_7.model.Generator import create_generator
 
