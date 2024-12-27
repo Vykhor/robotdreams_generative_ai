@@ -32,7 +32,7 @@ print(f"Датасет розбито на батчі з розміром {p_bat
 p_latent_dim = 100
 p_image_size = 28*28
 p_negative_slope = 0.2
-p_dropout = 0.3
+p_dropout = 0.5
 
 mnist_generator = create_generator(p_latent_dim, p_image_size)
 mnist_discriminator = create_discriminator(p_image_size, p_negative_slope, p_dropout)
@@ -40,12 +40,15 @@ mnist_discriminator = create_discriminator(p_image_size, p_negative_slope, p_dro
 # параметри навчання
 p_epochs = 100
 p_lr = 0.0002
+p_lr_g = 0.0002
+p_lr_d = 0.000005
 p_beta1 = 0.5
+p_beta2 = 0.999
 loss_fn = nn.BCELoss()
 
 # оптимізатори
-generator_optimizer = optim.Adam(mnist_generator.parameters(), lr=p_lr, betas=(p_beta1, 0.999))
-discriminator_optimizer = optim.Adam(mnist_discriminator.parameters(), lr=p_lr, betas=(p_beta1, 0.999))
+generator_optimizer = optim.Adam(mnist_generator.parameters(), lr=p_lr_g, betas=(p_beta1, p_beta2))
+discriminator_optimizer = optim.Adam(mnist_discriminator.parameters(), lr=p_lr_d, betas=(p_beta1, p_beta2))
 
 current_time = datetime.now().strftime("%H:%M:%S")
 print(f"[{current_time}] Початок процесу навчання")
@@ -98,13 +101,12 @@ for epoch in range(p_epochs):
     avg_generator_loss = total_generator_loss / num_batches
 
     current_time = datetime.now().strftime("%H:%M:%S")
-    print(
-        f"[{current_time}] | Epoch [{epoch + 1}/{p_epochs}] | Discriminator Loss: {avg_discriminator_loss:.4f}, Generator Loss: {avg_generator_loss:.4f}")
+    print(f"[{current_time}] | Epoch [{epoch + 1}/{p_epochs}] | Discriminator Loss: {avg_discriminator_loss:.4f}, Generator Loss: {avg_generator_loss:.4f}")
 
-    # приклад згенерованого зображення
+    # приклад згенерованих зображень
     if (epoch + 1) % 10 == 0:
         mnist_generator.eval()
-        plot(generator=mnist_generator, images_num=1, latent_dim=p_latent_dim)
+        plot(generator=mnist_generator, images_num=16, latent_dim=p_latent_dim)
         mnist_generator.train()
 
 torch.save(mnist_generator.state_dict(), "./model/mnist_generator.pth")

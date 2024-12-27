@@ -1,0 +1,49 @@
+# параметри моделей
+p_latent_dim = 100
+p_image_size = 28*28
+p_negative_slope = 0.2
+p_dropout = 0.5
+
+# параметри навчання
+p_epochs = 100
+p_lr_g = 0.0002 (було 0.0001 - намагаємось прискорити навчання генератора)
+p_lr_d = 0.000005 (було 0.00005 - намагаємось послабити дискримінатор)
+p_beta1 = 0.5
+p_beta2 = 0.999
+loss_fn = nn.BCELoss()
+
+# лог навчання
+[22:16:04] Початок процесу навчання
+[22:17:52] | Epoch [1/100] | Discriminator Loss: 1.4063, Generator Loss: 0.6460
+[22:19:38] | Epoch [2/100] | Discriminator Loss: 1.3915, Generator Loss: 0.6848
+[22:21:22] | Epoch [3/100] | Discriminator Loss: 1.3891, Generator Loss: 0.6905
+[22:22:54] | Epoch [4/100] | Discriminator Loss: 1.3884, Generator Loss: 0.6914
+[22:24:23] | Epoch [5/100] | Discriminator Loss: 1.3880, Generator Loss: 0.6928
+[22:25:51] | Epoch [6/100] | Discriminator Loss: 1.3876, Generator Loss: 0.6922
+[22:27:19] | Epoch [7/100] | Discriminator Loss: 1.3872, Generator Loss: 0.6932
+[22:28:47] | Epoch [8/100] | Discriminator Loss: 1.3866, Generator Loss: 0.6936
+[22:30:14] | Epoch [9/100] | Discriminator Loss: 1.3868, Generator Loss: 0.6916
+[22:31:41] | Epoch [10/100] | Discriminator Loss: 1.3859, Generator Loss: 0.6935
+[22:34:45] | Epoch [11/100] | Discriminator Loss: 1.3865, Generator Loss: 0.6920
+[22:36:00] | Epoch [12/100] | Discriminator Loss: 1.3863, Generator Loss: 0.6947
+[22:37:15] | Epoch [13/100] | Discriminator Loss: 1.3850, Generator Loss: 0.6936
+[22:38:31] | Epoch [14/100] | Discriminator Loss: 1.3844, Generator Loss: 0.6938
+[22:39:47] | Epoch [15/100] | Discriminator Loss: 1.3842, Generator Loss: 0.6926
+[22:41:02] | Epoch [16/100] | Discriminator Loss: 1.3832, Generator Loss: 0.6939
+[22:42:20] | Epoch [17/100] | Discriminator Loss: 1.3829, Generator Loss: 0.6960
+[22:43:36] | Epoch [18/100] | Discriminator Loss: 1.3806, Generator Loss: 0.6943
+[22:44:52] | Epoch [19/100] | Discriminator Loss: 1.3830, Generator Loss: 0.6969
+[22:46:09] | Epoch [20/100] | Discriminator Loss: 1.3790, Generator Loss: 0.6941
+[22:47:34] | Epoch [21/100] | Discriminator Loss: 1.3769, Generator Loss: 0.7035
+[22:48:52] | Epoch [22/100] | Discriminator Loss: 1.3772, Generator Loss: 0.6992
+[22:50:08] | Epoch [23/100] | Discriminator Loss: 1.3703, Generator Loss: 0.7074
+[22:51:27] | Epoch [24/100] | Discriminator Loss: 1.3736, Generator Loss: 0.7063
+[22:52:45] | Epoch [25/100] | Discriminator Loss: 1.3713, Generator Loss: 0.7084
+[22:54:02] | Epoch [26/100] | Discriminator Loss: 1.3456, Generator Loss: 0.7372
+[22:55:20] | Epoch [27/100] | Discriminator Loss: 1.3287, Generator Loss: 0.7531
+[22:56:36] | Epoch [28/100] | Discriminator Loss: 1.3605, Generator Loss: 0.7280
+[22:57:53] | Epoch [29/100] | Discriminator Loss: 1.3083, Generator Loss: 0.7792
+[22:59:10] | Epoch [30/100] | Discriminator Loss: 1.3358, Generator Loss: 0.7720
+
+Лог свідчить про те, що модель GAN стала значно більш збалансована, але дискримінатор, все ще, переважає і втрати генератора ростуть.
+Також, генератор створює дуже подібні результати на випадкових вхідних векторах (див. training_failed_example_2.png)
