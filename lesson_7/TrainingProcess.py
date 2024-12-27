@@ -108,6 +108,10 @@ for epoch in range(p_epochs):
         plot(generator=mnist_generator, images_num=16, latent_dim=p_latent_dim)
         mnist_generator.train()
 
+    if avg_generator_loss == 0.0 or avg_discriminator_loss == 0.0 or avg_generator_loss/avg_discriminator_loss > 5 or avg_discriminator_loss/avg_generator_loss > 5 :
+        print("Рання зупинка.")
+        break
+
 torch.save(mnist_generator.state_dict(), "./model/mnist_generator.pth")
 print("Генератор збережено у файл 'mnist_generator.pth'")
 
