@@ -49,7 +49,10 @@ discriminator_optimizer = optim.Adam(mnist_discriminator.parameters(), lr=p_lr, 
 
 current_time = datetime.now().strftime("%H:%M:%S")
 print(f"[{current_time}] Початок процесу навчання")
+
 # процес навчання
+mnist_discriminator.train()
+mnist_generator.train()
 for epoch in range(p_epochs):
     total_discriminator_loss = 0.0
     total_generator_loss = 0.0
@@ -100,7 +103,9 @@ for epoch in range(p_epochs):
 
     # приклад згенерованого зображення
     if (epoch + 1) % 10 == 0:
+        mnist_generator.eval()
         plot(generator=mnist_generator, images_num=1, latent_dim=p_latent_dim)
+        mnist_generator.train()
 
 torch.save(mnist_generator.state_dict(), "./model/mnist_generator.pth")
 print("Генератор збережено у файл 'mnist_generator.pth'")
