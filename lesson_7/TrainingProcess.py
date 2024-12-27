@@ -1,5 +1,6 @@
 import pandas as pd
 import torch
+from datetime import datetime
 from torch.utils.data import DataLoader, TensorDataset
 from torch import nn, optim
 
@@ -20,13 +21,11 @@ def load_dataset_csv(file_path):
     return TensorDataset(images, labels)
 
 training_data = load_dataset_csv("./data/training_data.csv")
-test_data = load_dataset_csv("./data/test_data.csv")
 
 # розбиття даних на батчі
 p_batch_size = 32
 
 training_loader = DataLoader(training_data, batch_size=p_batch_size, shuffle=True)
-test_loader = DataLoader(test_data, batch_size=p_batch_size, shuffle=False)
 print(f"Датасет розбито на батчі з розміром {p_batch_size}")
 
 # параметри моделей
@@ -48,9 +47,15 @@ loss_fn = nn.BCELoss()
 generator_optimizer = optim.Adam(mnist_generator.parameters(), lr=p_lr, betas=(p_beta1, 0.999))
 discriminator_optimizer = optim.Adam(mnist_discriminator.parameters(), lr=p_lr, betas=(p_beta1, 0.999))
 
+current_time = datetime.now().strftime("%H:%M:%S")
+print(f"[{current_time}] Початок процесу навчання")
 # процес навчання
 for epoch in range(p_epochs):
-    for real_images, _ in training_loader:
+    total_discriminator_loss = 0.0
+    total_generator_loss = 0.0
+    num_batches = len(training_loader)
+
+    for i, (real_images, _) in enumerate(training_loader):
         batch_size = real_images.size(0)
         real_images = real_images.view(batch_size, -1).to(device)
 
@@ -76,16 +81,26 @@ for epoch in range(p_epochs):
 
         # === Тренування генератора ===
         fake_output = mnist_discriminator(fake_images)
-        generator_loss = loss_fn(fake_output, real_labels)  # Генератор хоче, щоб дискримінатор думав, що дані справжні
+        generator_loss = loss_fn(fake_output, real_labels)
 
         generator_optimizer.zero_grad()
         generator_loss.backward()
         generator_optimizer.step()
 
-    print(f"Epoch [{epoch + 1}/{p_epochs}], Discriminator Loss: {discriminator_loss.item():.4f}, Generator Loss: {generator_loss.item():.4f}")
+        total_discriminator_loss += discriminator_loss.item()
+        total_generator_loss += generator_loss.item()
 
-    if p_epochs % 100 == 0:
-        plot(generator=mnist_generator, images_num=1)
+    # логування втрат
+    avg_discriminator_loss = total_discriminator_loss / num_batches
+    avg_generator_loss = total_generator_loss / num_batches
+
+    current_time = datetime.now().strftime("%H:%M:%S")
+    print(
+        f"[{current_time}] | Epoch [{epoch + 1}/{p_epochs}] | Discriminator Loss: {avg_discriminator_loss:.4f}, Generator Loss: {avg_generator_loss:.4f}")
+
+    # приклад згенерованого зображення
+    if (epoch + 1) % 10 == 0:
+        plot(generator=mnist_generator, images_num=1, latent_dim=p_latent_dim)
 
 torch.save(mnist_generator.state_dict(), "./model/mnist_generator.pth")
 print("Генератор збережено у файл 'mnist_generator.pth'")
