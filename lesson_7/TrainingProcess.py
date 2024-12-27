@@ -1,20 +1,26 @@
+import pandas as pd
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, TensorDataset
 from torch import nn, optim
-from torchvision.utils import make_grid
-import matplotlib.pyplot as plt
 
-from lesson_7.data.Dataset import load_dataset_csv
 from lesson_7.model.Discriminator import create_discriminator
 from lesson_7.model.Generator import create_generator
+from lesson_7.plot.Plotter import plot
 
 device = torch.device(
     "cuda" if torch.cuda.is_available()
     else "cpu")
 print(f"Використовується пристрій: {device}")
 
-training_data = load_dataset_csv("training_data.csv").to(device)
-test_data = load_dataset_csv("test_data.csv").to(device)
+def load_dataset_csv(file_path):
+    df = pd.read_csv(file_path)
+    labels = torch.tensor(df['label'].values, dtype=torch.long)
+    images = torch.tensor(df.drop(columns=['label']).values, dtype=torch.float32).view(-1, 1, 28, 28)
+    print(f"Датасет завантажено з файлу: {file_path}")
+    return TensorDataset(images, labels)
+
+training_data = load_dataset_csv("./data/training_data.csv")
+test_data = load_dataset_csv("./data/test_data.csv")
 
 # розбиття даних на батчі
 p_batch_size = 32
@@ -76,6 +82,11 @@ for epoch in range(p_epochs):
         generator_loss.backward()
         generator_optimizer.step()
 
-torch.save(mnist_generator.state_dict(), "mnist_generator.pth")
+    print(f"Epoch [{epoch + 1}/{p_epochs}], Discriminator Loss: {discriminator_loss.item():.4f}, Generator Loss: {generator_loss.item():.4f}")
+
+    if p_epochs % 100 == 0:
+        plot(generator=mnist_generator, images_num=1)
+
+torch.save(mnist_generator.state_dict(), "./model/mnist_generator.pth")
 print("Генератор збережено у файл 'mnist_generator.pth'")
 
