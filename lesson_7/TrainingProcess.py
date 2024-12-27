@@ -39,7 +39,6 @@ mnist_discriminator = create_discriminator(p_image_size, p_negative_slope, p_dro
 
 # параметри навчання
 p_epochs = 100
-p_lr = 0.0002
 p_lr_g = 0.0002
 p_lr_d = 0.000005
 p_beta1 = 0.5
