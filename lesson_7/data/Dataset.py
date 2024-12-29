@@ -1,29 +1,32 @@
 import pandas as pd
 import numpy as np
-from torchvision import datasets
-from torchvision.transforms import ToTensor, Compose, Normalize
+from torchvision import datasets, transforms
+from torchvision.transforms import Normalize
 
 
 def load_data():
-    # створення трансформації: тензор + нормалізація
-    transform = Compose([
-        ToTensor(),
-        Normalize((0.5,), (0.5,))  # нормалізація до [-1, 1]
+    # аугментація, тензор, нормалізація
+    train_transforms = transforms.Compose([
+        transforms.RandomRotation(10),
+        transforms.RandomAffine(10, translate=(0.1, 0.1)),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        Normalize((0.5,), (0.5,))
     ])
 
-    # завантаження даних, перетворення у тензори, нормалізація
+    # завантаження даних, застосування трансформацій
     training_data = datasets.MNIST(
         root='./datasets',
         train=True,
         download=True,
-        transform=transform
+        transform=train_transforms
     )
 
     test_data = datasets.MNIST(
         root='./datasets',
         train=False,
         download=True,
-        transform=transform
+        transform=train_transforms
     )
 
     return training_data, test_data
