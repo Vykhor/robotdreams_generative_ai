@@ -6,7 +6,6 @@ from lesson_7.plot.Plotter import plot
 # створення генератора
 latent_dim = 256
 image_size = 28 * 28
-
 mnist_generator = create_generator(latent_dim, image_size)
 
 # відновлення стану генератора зі збереженого файлу
