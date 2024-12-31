@@ -1,0 +1,79 @@
+Додано новий шар в архітектурі генератора:
+замість nn.Linear(1024, image_size),
+додано
+    nn.Linear(1024, 2048),
+    nn.ReLU(),
+    nn.Linear(2048, image_size),
+
+Навчена модель генератора збережена у results/mnist_generator.pth
+Приклад згенерованих зображень у results/example_3.png
+
+-----------------------
+
+# параметри моделей
+p_latent_dim = 100
+p_image_size = 28*28
+p_negative_slope = 0.2
+p_dropout = 0.3
+
+# параметри навчання
+p_epochs = 100
+p_lr_g = 0.0002
+p_lr_d = 0.000001
+p_beta1 = 0.5
+p_beta2 = 0.999
+p_weight_decay = 0.00001
+loss_fn = nn.BCELoss()
+
+# лог навчання
+[00:24:04] Початок процесу навчання
+[00:32:35] | Epoch [1/50] | Discriminator Loss: 2.9137, Generator Loss: 0.5557
+[00:43:04] | Epoch [2/50] | Discriminator Loss: 2.8058, Generator Loss: 0.6346
+[00:55:31] | Epoch [3/50] | Discriminator Loss: 2.7896, Generator Loss: 0.6564
+[01:07:54] | Epoch [4/50] | Discriminator Loss: 2.7850, Generator Loss: 0.6673
+[01:20:25] | Epoch [5/50] | Discriminator Loss: 2.7817, Generator Loss: 0.6770
+[01:32:41] | Epoch [6/50] | Discriminator Loss: 2.7800, Generator Loss: 0.6802
+[01:45:36] | Epoch [7/50] | Discriminator Loss: 2.7786, Generator Loss: 0.6858
+[01:59:48] | Epoch [8/50] | Discriminator Loss: 2.7776, Generator Loss: 0.6861
+[02:13:31] | Epoch [9/50] | Discriminator Loss: 2.7771, Generator Loss: 0.6892
+[02:26:43] | Epoch [10/50] | Discriminator Loss: 2.7766, Generator Loss: 0.6892
+[02:40:17] | Epoch [11/50] | Discriminator Loss: 2.7767, Generator Loss: 0.6886
+[02:52:15] | Epoch [12/50] | Discriminator Loss: 2.7764, Generator Loss: 0.6903
+[03:04:16] | Epoch [13/50] | Discriminator Loss: 2.7770, Generator Loss: 0.6898
+[03:16:12] | Epoch [14/50] | Discriminator Loss: 2.7758, Generator Loss: 0.6921
+[03:28:09] | Epoch [15/50] | Discriminator Loss: 2.7750, Generator Loss: 0.6927
+[03:40:06] | Epoch [16/50] | Discriminator Loss: 2.7755, Generator Loss: 0.6924
+[03:52:00] | Epoch [17/50] | Discriminator Loss: 2.7745, Generator Loss: 0.6910
+[04:03:56] | Epoch [18/50] | Discriminator Loss: 2.7748, Generator Loss: 0.6924
+[04:15:50] | Epoch [19/50] | Discriminator Loss: 2.7751, Generator Loss: 0.6921
+[04:27:46] | Epoch [20/50] | Discriminator Loss: 2.7749, Generator Loss: 0.6930
+[04:39:41] | Epoch [21/50] | Discriminator Loss: 2.7742, Generator Loss: 0.6927
+[04:51:36] | Epoch [22/50] | Discriminator Loss: 2.7742, Generator Loss: 0.6919
+[05:03:30] | Epoch [23/50] | Discriminator Loss: 2.7744, Generator Loss: 0.6926
+[05:15:24] | Epoch [24/50] | Discriminator Loss: 2.7748, Generator Loss: 0.6922
+[05:27:18] | Epoch [25/50] | Discriminator Loss: 2.7744, Generator Loss: 0.6922
+[05:39:15] | Epoch [26/50] | Discriminator Loss: 2.7744, Generator Loss: 0.6923
+[05:51:09] | Epoch [27/50] | Discriminator Loss: 2.7742, Generator Loss: 0.6924
+[06:03:04] | Epoch [28/50] | Discriminator Loss: 2.7737, Generator Loss: 0.6924
+[06:14:59] | Epoch [29/50] | Discriminator Loss: 2.7744, Generator Loss: 0.6926
+[06:26:56] | Epoch [30/50] | Discriminator Loss: 2.7743, Generator Loss: 0.6923
+[06:38:56] | Epoch [31/50] | Discriminator Loss: 2.7739, Generator Loss: 0.6930
+[06:50:54] | Epoch [32/50] | Discriminator Loss: 2.7741, Generator Loss: 0.6923
+[07:02:53] | Epoch [33/50] | Discriminator Loss: 2.7739, Generator Loss: 0.6923
+[07:14:53] | Epoch [34/50] | Discriminator Loss: 2.7736, Generator Loss: 0.6929
+[07:26:53] | Epoch [35/50] | Discriminator Loss: 2.7730, Generator Loss: 0.6930
+[07:38:55] | Epoch [36/50] | Discriminator Loss: 2.7734, Generator Loss: 0.6924
+[07:50:58] | Epoch [37/50] | Discriminator Loss: 2.7737, Generator Loss: 0.6919
+[08:03:00] | Epoch [38/50] | Discriminator Loss: 2.7738, Generator Loss: 0.6919
+[08:15:00] | Epoch [39/50] | Discriminator Loss: 2.7739, Generator Loss: 0.6923
+[08:27:12] | Epoch [40/50] | Discriminator Loss: 2.7733, Generator Loss: 0.6933
+[08:39:19] | Epoch [41/50] | Discriminator Loss: 2.7731, Generator Loss: 0.6909
+[08:51:22] | Epoch [42/50] | Discriminator Loss: 2.7732, Generator Loss: 0.6919
+[09:03:28] | Epoch [43/50] | Discriminator Loss: 2.7733, Generator Loss: 0.6924
+[09:15:31] | Epoch [44/50] | Discriminator Loss: 2.7741, Generator Loss: 0.6928
+[09:27:35] | Epoch [45/50] | Discriminator Loss: 2.7739, Generator Loss: 0.6928
+[09:39:41] | Epoch [46/50] | Discriminator Loss: 2.7733, Generator Loss: 0.6937
+[09:51:44] | Epoch [47/50] | Discriminator Loss: 2.7735, Generator Loss: 0.6920
+[10:03:53] | Epoch [48/50] | Discriminator Loss: 2.7733, Generator Loss: 0.6927
+[10:15:59] | Epoch [49/50] | Discriminator Loss: 2.7731, Generator Loss: 0.6924
+[10:28:46] | Epoch [50/50] | Discriminator Loss: 2.7726, Generator Loss: 0.6921

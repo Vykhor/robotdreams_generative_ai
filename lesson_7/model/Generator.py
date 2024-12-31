@@ -8,6 +8,8 @@ def create_generator(latent_dim, image_size):
     nn.ReLU(),
     nn.Linear(512, 1024),
     nn.ReLU(),
-    nn.Linear(1024, image_size),
+    nn.Linear(1024, 2048),
+    nn.ReLU(),
+    nn.Linear(2048, image_size),
     nn.Tanh()
 )

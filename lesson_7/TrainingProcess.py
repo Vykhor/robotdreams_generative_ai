@@ -21,16 +21,17 @@ def load_dataset_csv(file_path):
     return TensorDataset(images, labels)
 
 training_data = load_dataset_csv("./data/training_data.csv")
+print(f"Розмір навчального набору: {len(training_data)}")
 
 # розбиття даних на батчі
-p_batch_size = 32
+p_batch_size = 16
 
 training_loader = DataLoader(training_data, batch_size=p_batch_size, shuffle=True)
 
 print(f"Датасет розбито на батчі з розміром {p_batch_size}")
 
 # параметри моделей
-p_latent_dim = 256
+p_latent_dim = 100
 p_image_size = 28*28
 p_negative_slope = 0.2
 p_dropout = 0.3
@@ -39,17 +40,17 @@ mnist_generator = create_generator(p_latent_dim, p_image_size)
 mnist_discriminator = create_discriminator(p_image_size, p_negative_slope, p_dropout)
 
 # параметри навчання
-p_epochs = 100
+p_epochs = 50
 p_lr_g = 0.0002
-p_lr_d = 0.000005
+p_lr_d = 0.000001
 p_beta1 = 0.5
 p_beta2 = 0.999
 p_weight_decay = 0.00001
 loss_fn = nn.BCELoss()
 
 # оптимізатори
-generator_optimizer = optim.Adam(mnist_generator.parameters(), lr=p_lr_g, betas=(p_beta1, p_beta2), weight_decay=p_weight_decay)
 discriminator_optimizer = optim.Adam(mnist_discriminator.parameters(), lr=p_lr_d, betas=(p_beta1, p_beta2), weight_decay=p_weight_decay)
+generator_optimizer = optim.Adam(mnist_generator.parameters(), lr=p_lr_g, betas=(p_beta1, p_beta2), weight_decay=p_weight_decay)
 
 current_time = datetime.now().strftime("%H:%M:%S")
 print(f"[{current_time}] Початок процесу навчання")
@@ -72,6 +73,8 @@ for epoch in range(p_epochs):
         # === тренування дискримінатора ===
         real_labels = torch.ones(batch_size, 1).to(device)
         fake_labels = torch.zeros(batch_size, 1).to(device)
+
+        discriminator_optimizer.zero_grad()
 
         real_output_d  = mnist_discriminator(real_images)
         real_loss = loss_fn(real_output_d, real_labels)
@@ -112,7 +115,7 @@ for epoch in range(p_epochs):
 
     # логування втрат
     avg_discriminator_loss = total_discriminator_loss / num_batches
-    avg_generator_loss = total_generator_loss / num_batches * 2
+    avg_generator_loss = total_generator_loss / (num_batches  * 2)
 
     current_time = datetime.now().strftime("%H:%M:%S")
     print(f"[{current_time}] | Epoch [{epoch + 1}/{p_epochs}] | Discriminator Loss: {avg_discriminator_loss:.4f}, Generator Loss: {avg_generator_loss:.4f}")
