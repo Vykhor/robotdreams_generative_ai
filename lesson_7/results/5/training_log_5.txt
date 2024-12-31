@@ -1,0 +1,22 @@
+Порівняно з ітерацією 3:
+1. Додано Xavier Initialization.
+2. Додано розгладжування міток.
+
+Тренувальний процес реалізовано у TrainingProcess.py
+-----------------------
+
+# параметри моделей
+p_latent_dim = 200
+p_image_size = 28*28
+p_negative_slope = 0.2
+p_dropout = 0.3
+
+# параметри навчання
+p_epochs = 20
+p_lr_g = 0.0002
+p_lr_d = 0.00001
+p_beta1 = 0.5
+p_beta2 = 0.999
+p_generator_iterations = 2
+loss_fn = nn.BCELoss()
+
