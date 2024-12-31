@@ -1,0 +1,44 @@
+Підсумки:
+1. Без значних змін архітектури дискримінатора та генератора та без використання альтеративних функцій оптимізаторів
+вдалося добитись покращень результатів генерації зображень MNIST за відносно невелику кількість епох (20) завдяки:
+ - підбору параметрів моделі та навчання
+
+----
+    # параметри моделей
+    p_latent_dim = 200
+    p_image_size = 28*28
+    p_negative_slope = 0.2
+    p_dropout = 0.3
+
+    # параметри навчання
+    p_epochs = 20
+    p_lr_g = 0.0002
+    p_lr_d = 0.00001
+    p_beta1 = 0.5
+    p_beta2 = 0.999
+    p_generator_iterations = 2
+    loss_fn = nn.BCELoss()
+----
+
+ - додавання Xavier Initialization для моделей
+
+----
+    def weights_init(m):
+        if isinstance(m, nn.Linear):
+            nn.init.xavier_uniform_(m.weight)
+            nn.init.zeros_(m.bias)
+
+    mnist_generator.apply(weights_init)
+    mnist_discriminator.apply(weights_init)
+----
+
+ - додавання розгладжування міток
+----
+    real_labels = torch.full((batch_size, 1), 0.9).to(device)
+    fake_labels = torch.full((batch_size, 1), 0.1).to(device)
+----
+
+2. Не вдалось досягти різноманітності  результатів генерації недивлячись на спроби додати Feature Matching Loss, MinibatchDiscrimination
+та збільшення кількості епох навчання.
+
+Більш дедальні результати знаходяться в папках 1-5, включаючи збережені натреновані моделі генератора.

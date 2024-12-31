@@ -9,7 +9,7 @@ image_size = 28 * 28
 mnist_generator = create_generator(latent_dim, image_size)
 
 # відновлення стану генератора зі збереженого файлу
-mnist_generator.load_state_dict(torch.load("../results/5/mnist_generator.pth"))
+mnist_generator.load_state_dict(torch.load("../results/5/mnist_generator_5.pth"))
 mnist_generator.eval()  # переведення моделі в режим оцінювання
 print("Генератор завантажено")
 
