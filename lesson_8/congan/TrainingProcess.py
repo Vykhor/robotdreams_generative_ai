@@ -30,7 +30,7 @@ training_loader = DataLoader(training_data, batch_size=p_batch_size, shuffle=Tru
 print(f"Датасет розбито на батчі з розміром {p_batch_size}")
 
 # параметри моделей
-p_latent_dim = 200
+p_latent_dim = 100
 p_image_size = 28*28
 p_condition_size = 10
 p_negative_slope = 0.2
@@ -71,24 +71,25 @@ for epoch in range(p_epochs):
     total_generator_loss = 0.0
     num_batches = len(training_loader)
 
-    for i, (real_images, _) in enumerate(training_loader):
+    for i, (real_images, labels) in enumerate(training_loader):
         batch_size = real_images.size(0)
         real_images = real_images.view(batch_size, -1).to(device)
-
-        # === тренування дискримінатора ===
-        #real_labels = torch.ones(batch_size, 1).to(device)
-        #fake_labels = torch.zeros(batch_size, 1).to(device)
+        real_conditions = torch.nn.functional.one_hot(labels, num_classes=p_condition_size).float().to(device)
 
         real_labels = torch.full((batch_size, 1), 0.9).to(device)
         fake_labels = torch.full((batch_size, 1), 0.1).to(device)
 
-        real_output_d = mnist_discriminator(real_images)
+        real_input = torch.cat((real_images, real_conditions), dim=1)
+        real_output_d = mnist_discriminator(real_input)
         real_loss = loss_fn(real_output_d, real_labels)
 
         # генерація фейкових даних
         noise = torch.randn(batch_size, p_latent_dim).to(device)
-        fake_images = mnist_generator(noise)
-        fake_output_d = mnist_discriminator(fake_images.detach())
+        fake_conditions = torch.eye(p_condition_size)[torch.randint(0, p_condition_size, (batch_size,))].to(device)
+        generator_input = torch.cat((noise, fake_conditions), dim=1)
+        fake_images = mnist_generator(generator_input)
+        fake_input = torch.cat((fake_images, fake_conditions), dim=1)
+        fake_output_d = mnist_discriminator(fake_input)
         fake_loss = loss_fn(fake_output_d, fake_labels)
 
         discriminator_loss = real_loss + fake_loss
@@ -99,8 +100,12 @@ for epoch in range(p_epochs):
         # === Тренування генератора ===
         for _ in range(p_generator_iterations):
             noise = torch.randn(batch_size, p_latent_dim).to(device)
-            fake_images = mnist_generator(noise)
-            fake_output_g = mnist_discriminator(fake_images)
+            fake_conditions = torch.eye(p_condition_size)[torch.randint(0, p_condition_size, (batch_size,))].to(device)
+            generator_input = torch.cat((noise, fake_conditions), dim=1)
+            fake_images = mnist_generator(generator_input)
+
+            fake_input = torch.cat((fake_images, fake_conditions), dim=1)
+            fake_output_g = mnist_discriminator(fake_input)
 
             generator_loss = loss_fn(fake_output_g, real_labels)
             generator_optimizer.zero_grad()
