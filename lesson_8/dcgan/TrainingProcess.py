@@ -19,7 +19,7 @@ def load_dataset_csv(file_path):
     print(f"Датасет завантажено з файлу: {file_path}")
     return TensorDataset(images, labels)
 
-training_data = load_dataset_csv("../../training_data.csv")
+training_data = load_dataset_csv("../training_data.csv")
 print(f"Розмір навчального набору: {len(training_data)}")
 
 # розбиття даних на батчі
@@ -36,6 +36,8 @@ p_negative_slope = 0.2
 
 mnist_generator = create_generator(latent_dim=p_latent_dim)
 mnist_discriminator = create_discriminator(negative_slope=p_negative_slope)
+
+#mnist_discriminator = DebugDiscriminator()
 
 def weights_init(m):
     if isinstance(m, nn.Linear):
@@ -71,7 +73,7 @@ for epoch in range(p_epochs):
 
     for i, (real_images, _) in enumerate(training_loader):
         batch_size = real_images.size(0)
-        real_images = real_images.view(batch_size, -1).to(device)
+        real_images = real_images.view(batch_size, 1, 28, 28).to(device)
 
         # === тренування дискримінатора ===
         #real_labels = torch.ones(batch_size, 1).to(device)
@@ -80,13 +82,13 @@ for epoch in range(p_epochs):
         real_labels = torch.full((batch_size, 1), 0.9).to(device)
         fake_labels = torch.full((batch_size, 1), 0.1).to(device)
 
-        real_output_d = mnist_discriminator(real_images)
+        real_output_d = mnist_discriminator(real_images).view(batch_size, -1)
         real_loss = loss_fn(real_output_d, real_labels)
 
         # генерація фейкових даних
-        noise = torch.randn(batch_size, p_latent_dim).to(device)
-        fake_images = mnist_generator(noise)
-        fake_output_d = mnist_discriminator(fake_images.detach())
+        noise = torch.randn(batch_size, p_latent_dim, 1, 1).to(device)
+        fake_images = mnist_generator(noise).view(batch_size, 1, 28, 28).to(device)
+        fake_output_d = mnist_discriminator(fake_images.detach()).view(batch_size, -1)
         fake_loss = loss_fn(fake_output_d, fake_labels)
 
         discriminator_loss = real_loss + fake_loss
@@ -96,9 +98,9 @@ for epoch in range(p_epochs):
 
         # === Тренування генератора ===
         for _ in range(p_generator_iterations):
-            noise = torch.randn(batch_size, p_latent_dim).to(device)
+            noise = torch.randn(batch_size, p_latent_dim, 1, 1).to(device)
             fake_images = mnist_generator(noise)
-            fake_output_g = mnist_discriminator(fake_images)
+            fake_output_g = mnist_discriminator(fake_images).view(batch_size, -1)
 
             generator_loss = loss_fn(fake_output_g, real_labels)
             generator_optimizer.zero_grad()
