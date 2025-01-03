@@ -57,7 +57,7 @@ def gradient_penalty(critic, real_images, fake_images, device):
     return penalty
 
 # параметри моделей
-p_latent_dim = 200
+p_latent_dim = 100
 p_image_size = 28*28
 p_negative_slope = 0.2
 p_dropout = 0.3
