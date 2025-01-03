@@ -1,8 +1,9 @@
 from torch import nn
 
-def create_generator(latent_dim, image_size):
+def create_generator(latent_dim, condition_size, image_size):
+    input_size = latent_dim + condition_size
     return nn.Sequential(
-    nn.Linear(latent_dim, 256),
+    nn.Linear(input_size, 256),
     nn.ReLU(),
     nn.Linear(256, 512),
     nn.ReLU(),

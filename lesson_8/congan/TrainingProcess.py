@@ -4,8 +4,8 @@ from datetime import datetime
 from torch.utils.data import DataLoader, TensorDataset
 from torch import nn, optim
 
-from lesson_7.model.Discriminator import create_discriminator
-from lesson_7.model.Generator import create_generator
+from lesson_8.congan.model.Discriminator import create_discriminator
+from lesson_8.congan.model.Generator import create_generator
 
 device = torch.device(
     "cuda" if torch.cuda.is_available()
@@ -32,11 +32,12 @@ print(f"Датасет розбито на батчі з розміром {p_bat
 # параметри моделей
 p_latent_dim = 200
 p_image_size = 28*28
+p_condition_size = 10
 p_negative_slope = 0.2
 p_dropout = 0.3
 
-mnist_generator = create_generator(p_latent_dim, p_image_size)
-mnist_discriminator = create_discriminator(p_image_size, p_negative_slope, p_dropout)
+mnist_generator = create_generator(p_latent_dim, p_condition_size, p_image_size)
+mnist_discriminator = create_discriminator(p_image_size, p_condition_size, p_negative_slope, p_dropout)
 
 def weights_init(m):
     if isinstance(m, nn.Linear):
