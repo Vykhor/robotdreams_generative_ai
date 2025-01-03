@@ -74,7 +74,7 @@ mnist_generator.apply(weights_init)
 mnist_discriminator.apply(weights_init)
 
 # параметри навчання
-p_epochs = 5
+p_epochs = 20
 p_lr_g = 1e-4
 p_lr_d = 1e-4
 p_beta1 = 0.0
