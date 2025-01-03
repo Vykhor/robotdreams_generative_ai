@@ -1,15 +1,13 @@
 import torch
-
-from lesson_7.model.Generator import create_generator
-from lesson_7.plot.Plotter import plot
+from lesson_8.dcgan.model.Generator import create_generator
+from lesson_8.common.plot.Plotter import plot
 
 # створення генератора
 latent_dim = 100
-image_size = 28 * 28
-mnist_generator = create_generator(latent_dim, image_size)
+mnist_generator = create_generator(latent_dim)
 
 # відновлення стану генератора зі збереженого файлу
-mnist_generator.load_state_dict(torch.load("../results/mnist_generator.pth"))
+mnist_generator.load_state_dict(torch.load("../../dcgan/results/mnist_generator.pth"))
 mnist_generator.eval()  # переведення моделі в режим оцінювання
 print("Генератор завантажено")
 

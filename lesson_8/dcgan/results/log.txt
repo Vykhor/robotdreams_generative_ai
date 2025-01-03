@@ -1,0 +1,22 @@
+Датасет розбито на батчі з розміром 32
+[03:06:13] Початок процесу навчання
+[03:47:32] | Epoch [1/20] | Discriminator Loss: 3.2421, Generator Loss: 0.6504
+[04:20:35] | Epoch [2/20] | Discriminator Loss: 2.6535, Generator Loss: 0.7870
+[04:53:41] | Epoch [3/20] | Discriminator Loss: 2.7877, Generator Loss: 0.7118
+[05:26:57] | Epoch [4/20] | Discriminator Loss: 2.7329, Generator Loss: 0.7278
+[06:00:20] | Epoch [5/20] | Discriminator Loss: 2.7245, Generator Loss: 0.7289
+[06:33:36] | Epoch [6/20] | Discriminator Loss: 2.7104, Generator Loss: 0.7339
+[07:06:55] | Epoch [7/20] | Discriminator Loss: 2.7031, Generator Loss: 0.7367
+[07:41:14] | Epoch [8/20] | Discriminator Loss: 2.7005, Generator Loss: 0.7352
+[08:14:59] | Epoch [9/20] | Discriminator Loss: 2.6760, Generator Loss: 0.7443
+[08:48:32] | Epoch [10/20] | Discriminator Loss: 2.6673, Generator Loss: 0.7475
+[09:22:07] | Epoch [11/20] | Discriminator Loss: 2.6197, Generator Loss: 0.7666
+[09:55:24] | Epoch [12/20] | Discriminator Loss: 2.6450, Generator Loss: 0.7606
+[10:27:54] | Epoch [13/20] | Discriminator Loss: 2.5737, Generator Loss: 0.7882
+[10:58:17] | Epoch [14/20] | Discriminator Loss: 2.5179, Generator Loss: 0.8145
+[11:28:17] | Epoch [15/20] | Discriminator Loss: 2.5182, Generator Loss: 0.8215
+[11:58:42] | Epoch [16/20] | Discriminator Loss: 2.4945, Generator Loss: 0.8304
+[12:29:13] | Epoch [17/20] | Discriminator Loss: 2.4929, Generator Loss: 0.8364
+[13:00:01] | Epoch [18/20] | Discriminator Loss: 2.4869, Generator Loss: 0.8374
+[13:30:59] | Epoch [19/20] | Discriminator Loss: 2.4449, Generator Loss: 0.8549
+[14:01:13] | Epoch [20/20] | Discriminator Loss: 2.4303, Generator Loss: 0.8669
