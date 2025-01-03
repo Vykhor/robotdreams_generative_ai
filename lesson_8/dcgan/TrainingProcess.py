@@ -4,8 +4,8 @@ from datetime import datetime
 from torch.utils.data import DataLoader, TensorDataset
 from torch import nn, optim
 
-from lesson_7.model.Discriminator import create_discriminator
-from lesson_7.model.Generator import create_generator
+from lesson_8.dcgan.model.Discriminator import create_discriminator
+from lesson_8.dcgan.model.Generator import create_generator
 
 device = torch.device(
     "cuda" if torch.cuda.is_available()
@@ -19,7 +19,7 @@ def load_dataset_csv(file_path):
     print(f"Датасет завантажено з файлу: {file_path}")
     return TensorDataset(images, labels)
 
-training_data = load_dataset_csv("../common/data/training_data.csv")
+training_data = load_dataset_csv("../../training_data.csv")
 print(f"Розмір навчального набору: {len(training_data)}")
 
 # розбиття даних на батчі
@@ -30,13 +30,12 @@ training_loader = DataLoader(training_data, batch_size=p_batch_size, shuffle=Tru
 print(f"Датасет розбито на батчі з розміром {p_batch_size}")
 
 # параметри моделей
-p_latent_dim = 200
+p_latent_dim = 100
 p_image_size = 28*28
 p_negative_slope = 0.2
-p_dropout = 0.3
 
-mnist_generator = create_generator(p_latent_dim, p_image_size)
-mnist_discriminator = create_discriminator(p_image_size, p_negative_slope, p_dropout)
+mnist_generator = create_generator(latent_dim=p_latent_dim)
+mnist_discriminator = create_discriminator(negative_slope=p_negative_slope)
 
 def weights_init(m):
     if isinstance(m, nn.Linear):

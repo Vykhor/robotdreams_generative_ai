@@ -1,37 +1,15 @@
-import torch
 from torch import nn
 
-class MinibatchDiscrimination(nn.Module):
-    def __init__(self, in_features, out_features, kernel_dim):
-        super(MinibatchDiscrimination, self).__init__()
-        self.T = nn.Parameter(torch.randn(in_features, out_features * kernel_dim))
-        self.out_features = out_features
-        self.kernel_dim = kernel_dim
-
-    def forward(self, x):
-        batch_size = x.size(0)
-        m = x @ self.T  # Розмір: (batch_size, out_features * kernel_dim)
-        m = m.view(batch_size, self.out_features, self.kernel_dim)
-        out = torch.zeros(batch_size, self.out_features, device=x.device)
-
-        for i in range(batch_size):
-            diff = m[i].unsqueeze(0) - m  # Різниця між поточним і всіма іншими
-            abs_diff = torch.sum(torch.abs(diff), dim=2)  # Розмір: (batch_size, out_features)
-            out[i] = torch.sum(torch.exp(-abs_diff), dim=0)  # Експонента для взаємодії
-
-        return torch.cat([x, out], dim=1)  # Конкатенація оригінальних ознак
-
-def create_discriminator(image_size, negative_slope,  dropout):
+def create_discriminator(negative_slope):
     return nn.Sequential(
-        nn.Linear(image_size, 1024),
+        nn.Conv2d(1, 128, kernel_size=4, stride=2, padding=1),
         nn.LeakyReLU(negative_slope=negative_slope),
-        nn.Dropout(p=dropout),
-        nn.Linear(1024, 512),
+        nn.Conv2d(128, 256, kernel_size=4, stride=2, padding=1),
+        nn.BatchNorm2d(256),
         nn.LeakyReLU(negative_slope=negative_slope),
-        nn.Dropout(p=dropout),
-        nn.Linear(512, 256),
+        nn.Conv2d(256, 512, kernel_size=4, stride=2, padding=1),
+        nn.BatchNorm2d(512),
         nn.LeakyReLU(negative_slope=negative_slope),
-        nn.Dropout(p=dropout),
-        nn.Linear(256, 1),
+        nn.Conv2d(512, 1, kernel_size=4, stride=1, padding=0),
         nn.Sigmoid()
-)
+    )

@@ -29,4 +29,4 @@ def save_dataset_csv(dataset, file_path):
 
 training_data = load_data()
 
-save_dataset_csv(training_data, "training_data.csv")
+save_dataset_csv(training_data, "../../training_data.csv")
