@@ -1,0 +1,23 @@
+Датасет розбито на батчі з розміром 32
+[22:40:15] Початок процесу навчання
+[23:14:33] | Epoch [1/20] | Discriminator Loss: 0.0461, Generator Loss: -0.1603
+[23:45:35] | Epoch [2/20] | Discriminator Loss: -0.1257, Generator Loss: 0.3155
+[00:15:32] | Epoch [3/20] | Discriminator Loss: -0.1018, Generator Loss: -0.0046
+[00:45:55] | Epoch [4/20] | Discriminator Loss: -0.0842, Generator Loss: -0.1662
+[01:21:13] | Epoch [5/20] | Discriminator Loss: -0.0726, Generator Loss: -0.2248
+[01:53:45] | Epoch [6/20] | Discriminator Loss: -0.0668, Generator Loss: -0.2149
+[02:26:37] | Epoch [7/20] | Discriminator Loss: -0.0614, Generator Loss: -0.1833
+[02:59:39] | Epoch [8/20] | Discriminator Loss: -0.0572, Generator Loss: -0.1912
+[03:32:45] | Epoch [9/20] | Discriminator Loss: -0.0537, Generator Loss: -0.1947
+[04:06:01] | Epoch [10/20] | Discriminator Loss: -0.0493, Generator Loss: -0.2319
+[04:39:25] | Epoch [11/20] | Discriminator Loss: -0.0448, Generator Loss: -0.2035
+[05:13:17] | Epoch [12/20] | Discriminator Loss: -0.0456, Generator Loss: -0.2007
+[05:47:28] | Epoch [13/20] | Discriminator Loss: -0.0425, Generator Loss: -0.2098
+[06:21:57] | Epoch [14/20] | Discriminator Loss: -0.0411, Generator Loss: -0.1785
+[06:56:22] | Epoch [15/20] | Discriminator Loss: -0.0413, Generator Loss: -0.1712
+[07:30:45] | Epoch [16/20] | Discriminator Loss: -0.0387, Generator Loss: -0.2110
+[08:05:08] | Epoch [17/20] | Discriminator Loss: -0.0378, Generator Loss: -0.1483
+[08:39:43] | Epoch [18/20] | Discriminator Loss: -0.0350, Generator Loss: -0.1673
+[09:14:15] | Epoch [19/20] | Discriminator Loss: -0.0330, Generator Loss: -0.1637
+[09:48:46] | Epoch [20/20] | Discriminator Loss: -0.0318, Generator Loss: -0.1822
+Генератор збережено у файл 'mnist_generator.pth'
