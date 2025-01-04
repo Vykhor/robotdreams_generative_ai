@@ -24,10 +24,48 @@ print(f"Розмір навчального набору: {len(training_data)}")
 
 # розбиття даних на батчі
 p_batch_size = 32
-
 training_loader = DataLoader(training_data, batch_size=p_batch_size, shuffle=True)
-
 print(f"Датасет розбито на батчі з розміром {p_batch_size}")
+
+# функції втрат
+def discriminator_loss_fn(real_output, fake_output):
+    return -(torch.mean(real_output) - torch.mean(fake_output))
+
+def generator_loss_fn(fake_output):
+    return -torch.mean(fake_output)
+
+# gradient penalty для WGAN-GP
+def gradient_penalty(i_discriminator, i_real_images, i_fake_images, i_conditions, i_device):
+    batch_size = i_real_images.size(0)
+
+    # Приведення зображень до векторного вигляду
+    i_real_images = i_real_images.view(batch_size, -1)
+    i_fake_images = i_fake_images.view(batch_size, -1)
+
+    alpha = torch.rand(batch_size, 1).to(i_device)
+    interpolated = (alpha * i_real_images + (1 - alpha) * i_fake_images).requires_grad_(True)
+
+    # Конкатенація інтерпольованих зображень з умовами
+    interpolated_input = torch.cat((interpolated, i_conditions), dim=1)
+
+    # Пропуск через дискримінатор
+    interpolated_output = i_discriminator(interpolated_input)
+
+    # Обчислення градієнтів
+    gradients = torch.autograd.grad(
+        outputs=interpolated_output,
+        inputs=interpolated,
+        grad_outputs=torch.ones(interpolated_output.size()).to(i_device),
+        create_graph=True,
+        retain_graph=True,
+        only_inputs=True,
+    )[0]
+
+    # Обчислення штрафу за градієнт
+    gradients = gradients.view(batch_size, -1)
+    penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
+    return penalty
+
 
 # параметри моделей
 p_latent_dim = 100
@@ -49,16 +87,16 @@ mnist_discriminator.apply(weights_init)
 
 # параметри навчання
 p_epochs = 20
-p_lr_g = 0.0002
-p_lr_d = 0.00001
-p_beta1 = 0.5
-p_beta2 = 0.999
-p_generator_iterations = 2
-loss_fn = nn.BCELoss()
+p_lr_g = 1e-4
+p_lr_d = 1e-4
+p_beta1 = 0.0
+p_beta2 = 0.9
+p_discriminator_iterations = 5
+lambda_gp = 10  # коефіцієнт для градієнтного штрафу
 
 # оптимізатори
-discriminator_optimizer = optim.Adam(mnist_discriminator.parameters(), lr=p_lr_d, betas=(p_beta1, p_beta2))
-generator_optimizer = optim.Adam(mnist_generator.parameters(), lr=p_lr_g, betas=(p_beta1, p_beta2))
+discriminator_optimizer = torch.optim.Adam(mnist_discriminator.parameters(), lr=p_lr_d, betas=(p_beta1, p_beta2))
+generator_optimizer = torch.optim.Adam(mnist_generator.parameters(), lr=p_lr_g, betas=(p_beta1, p_beta2))
 
 current_time = datetime.now().strftime("%H:%M:%S")
 print(f"[{current_time}] Початок процесу навчання")
@@ -76,48 +114,51 @@ for epoch in range(p_epochs):
         real_images = real_images.view(batch_size, -1).to(device)
         real_conditions = torch.nn.functional.one_hot(labels, num_classes=p_condition_size).float().to(device)
 
-        real_labels = torch.full((batch_size, 1), 0.9).to(device)
-        fake_labels = torch.full((batch_size, 1), 0.1).to(device)
+        # === тренування дискримінатора ===
+        for _ in range(p_discriminator_iterations):
+            real_labels = torch.full((batch_size, 1), 0.9).to(device)
+            fake_labels = torch.full((batch_size, 1), 0.1).to(device)
 
-        real_input = torch.cat((real_images, real_conditions), dim=1)
-        real_output_d = mnist_discriminator(real_input)
-        real_loss = loss_fn(real_output_d, real_labels)
+            real_input = torch.cat((real_images, real_conditions), dim=1)
+            real_output_d = mnist_discriminator(real_input)
 
-        # генерація фейкових даних
-        noise = torch.randn(batch_size, p_latent_dim).to(device)
-        fake_conditions = torch.eye(p_condition_size)[torch.randint(0, p_condition_size, (batch_size,))].to(device)
-        generator_input = torch.cat((noise, fake_conditions), dim=1)
-        fake_images = mnist_generator(generator_input)
-        fake_input = torch.cat((fake_images, fake_conditions), dim=1)
-        fake_output_d = mnist_discriminator(fake_input)
-        fake_loss = loss_fn(fake_output_d, fake_labels)
 
-        discriminator_loss = real_loss + fake_loss
-        discriminator_optimizer.zero_grad()
-        discriminator_loss.backward()
-        discriminator_optimizer.step()
-
-        # === Тренування генератора ===
-        for _ in range(p_generator_iterations):
+            # генерація фейкових даних
             noise = torch.randn(batch_size, p_latent_dim).to(device)
             fake_conditions = torch.eye(p_condition_size)[torch.randint(0, p_condition_size, (batch_size,))].to(device)
             generator_input = torch.cat((noise, fake_conditions), dim=1)
             fake_images = mnist_generator(generator_input)
-
             fake_input = torch.cat((fake_images, fake_conditions), dim=1)
-            fake_output_g = mnist_discriminator(fake_input)
+            fake_output_d = mnist_discriminator(fake_input)
 
-            generator_loss = loss_fn(fake_output_g, real_labels)
-            generator_optimizer.zero_grad()
-            generator_loss.backward()
-            generator_optimizer.step()
+            discriminator_loss = discriminator_loss_fn(real_output_d, fake_output_d)
+            gp = gradient_penalty(mnist_discriminator, real_images, fake_images, real_conditions, device)
+            discriminator_loss += lambda_gp * gp
 
-            total_discriminator_loss += discriminator_loss.item()
-            total_generator_loss += generator_loss.item()
+            discriminator_optimizer.zero_grad()
+            discriminator_loss.backward()
+            discriminator_optimizer.step()
+
+        # === тренування генератора ===
+        noise = torch.randn(batch_size, p_latent_dim).to(device)
+        fake_conditions = torch.eye(p_condition_size)[torch.randint(0, p_condition_size, (batch_size,))].to(device)
+        generator_input = torch.cat((noise, fake_conditions), dim=1)
+        fake_images = mnist_generator(generator_input)
+
+        fake_input = torch.cat((fake_images, fake_conditions), dim=1)
+        fake_output_g = mnist_discriminator(fake_input)
+
+        generator_loss = generator_loss_fn(fake_output_g)
+        generator_optimizer.zero_grad()
+        generator_loss.backward()
+        generator_optimizer.step()
+
+        total_discriminator_loss += discriminator_loss.item()
+        total_generator_loss += generator_loss.item()
 
     # логування втрат
-    avg_discriminator_loss = total_discriminator_loss / num_batches
-    avg_generator_loss = total_generator_loss / (num_batches  * p_generator_iterations)
+    avg_discriminator_loss = total_discriminator_loss / (num_batches * p_discriminator_iterations)
+    avg_generator_loss = total_generator_loss / num_batches
 
     current_time = datetime.now().strftime("%H:%M:%S")
     print(f"[{current_time}] | Epoch [{epoch + 1}/{p_epochs}] | Discriminator Loss: {avg_discriminator_loss:.4f}, Generator Loss: {avg_generator_loss:.4f}")
