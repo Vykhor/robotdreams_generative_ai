@@ -2,7 +2,7 @@ import pandas as pd
 import torch
 from datetime import datetime
 from torch.utils.data import DataLoader, TensorDataset
-from torch import nn, optim
+from torch import nn
 
 from lesson_8.congan.model.Discriminator import create_discriminator
 from lesson_8.congan.model.Generator import create_generator
@@ -72,7 +72,7 @@ p_latent_dim = 100
 p_image_size = 28*28
 p_condition_size = 10
 p_negative_slope = 0.2
-p_dropout = 0.3
+p_dropout = 0.2
 
 mnist_generator = create_generator(p_latent_dim, p_condition_size, p_image_size)
 mnist_discriminator = create_discriminator(p_image_size, p_condition_size, p_negative_slope, p_dropout)
@@ -87,8 +87,8 @@ mnist_discriminator.apply(weights_init)
 
 # параметри навчання
 p_epochs = 20
-p_lr_g = 1e-4
-p_lr_d = 1e-4
+p_lr_g = 0.0002
+p_lr_d = 0.00005
 p_beta1 = 0.0
 p_beta2 = 0.9
 p_discriminator_iterations = 5
@@ -139,6 +139,8 @@ for epoch in range(p_epochs):
             discriminator_loss.backward()
             discriminator_optimizer.step()
 
+            total_discriminator_loss += discriminator_loss.item()
+
         # === тренування генератора ===
         noise = torch.randn(batch_size, p_latent_dim).to(device)
         fake_conditions = torch.eye(p_condition_size)[torch.randint(0, p_condition_size, (batch_size,))].to(device)
@@ -153,7 +155,6 @@ for epoch in range(p_epochs):
         generator_loss.backward()
         generator_optimizer.step()
 
-        total_discriminator_loss += discriminator_loss.item()
         total_generator_loss += generator_loss.item()
 
     # логування втрат
