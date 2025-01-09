@@ -34,7 +34,6 @@ p_batch_size = 32
 training_loader = get_dataloader(file_path, p_batch_size)
 num_batches = len(training_loader)
 print(f"Датасет розбито на {num_batches} батчів розміром {p_batch_size}.")
-print(f"{len(training_loader)}")
 
 # Параметри моделей
 p_negative_slope = 0.2
