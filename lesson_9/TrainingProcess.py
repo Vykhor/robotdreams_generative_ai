@@ -1,9 +1,11 @@
 import pandas as pd
 import torch
 from datetime import datetime
+
 from torch.utils.data import DataLoader, TensorDataset
 from torch import nn, optim
 
+from lesson_9.Vizualization import plot, plot_comparing
 from lesson_9.model.Generator import create_generator
 from lesson_9.model.Discriminator import create_discriminator
 from lesson_9.Metrics import calculate_psnr
@@ -43,7 +45,7 @@ generator = create_generator(p_negative_slope).to(device)
 discriminator = create_discriminator(p_negative_slope).to(device)
 
 # Параметри навчання
-num_epochs = 2
+num_epochs = 20
 lr_gen = 0.0002
 lr_disc = 0.0001
 beta1, beta2 = 0.5, 0.999
@@ -58,6 +60,9 @@ optimizer_d = optim.Adam(discriminator.parameters(), lr=lr_disc, betas=(beta1, b
 
 current_time = datetime.now().strftime("%H:%M:%S")
 print(f"[{current_time}] Початок процесу навчання")
+
+psnr_list = []
+ssim_list = []
 
 for epoch in range(num_epochs):
     for batch in training_loader:
@@ -95,7 +100,7 @@ for epoch in range(num_epochs):
         optimizer_g.step()
 
     current_time = datetime.now().strftime("%H:%M:%S")
-    print(f"{current_time} | Епоха [{epoch + 1}/{num_epochs}] завершена. Обчислення метрик.")
+    print(f"[{current_time}] | Епоха [{epoch + 1}/{num_epochs}] завершена. Обчислення метрик.")
 
     # Обчислення метрик після кожної епохи
     psnr_total = 0
@@ -113,5 +118,15 @@ for epoch in range(num_epochs):
     avg_psnr = psnr_total / num_batches
     avg_ssim = ssim_total / num_batches
 
+    # Додаємо середні значення метрик до списків
+    psnr_list.append(avg_psnr)
+    ssim_list.append(avg_ssim)
+
     current_time = datetime.now().strftime("%H:%M:%S")
-    print(f"{current_time} PSNR: {avg_psnr:.2f}  SSIM: {avg_ssim:.4f}")
+    print(f"[{current_time}] PSNR: {avg_psnr:.2f}  SSIM: {avg_ssim:.4f}")
+
+    # Візуалізація порівняння пошкодженого та відновленого зображення
+    if epoch % 1 == 0:  # Наприклад, кожну епоху
+        plot_comparing(damaged_image=damaged_images[0], restored_image=restored_images[0], real_image=real_images[0])
+
+plot(num_epochs=num_epochs, psnr_list=psnr_list,  ssim_list=ssim_list)
