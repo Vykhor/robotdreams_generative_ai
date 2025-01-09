@@ -66,7 +66,6 @@ ssim_list = []
 
 for epoch in range(num_epochs):
     for batch in training_loader:
-
         damaged_images = batch[0].to(device)
         real_images = damaged_images.clone()
 
@@ -126,7 +125,7 @@ for epoch in range(num_epochs):
     print(f"[{current_time}] PSNR: {avg_psnr:.2f}  SSIM: {avg_ssim:.4f}")
 
     # Візуалізація порівняння пошкодженого та відновленого зображення
-    if epoch % 1 == 0:  # Наприклад, кожну епоху
+    if epoch % 1 == 0:
         plot_comparing(damaged_image=damaged_images[0], restored_image=restored_images[0], real_image=real_images[0])
 
 plot(num_epochs=num_epochs, psnr_list=psnr_list,  ssim_list=ssim_list)
