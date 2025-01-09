@@ -2,9 +2,18 @@ import pandas as pd
 import numpy as np
 import torch
 from torchvision import datasets, transforms
+from torchvision.datasets import CIFAR10
 from torchvision.transforms import Normalize
 import cv2
 import random
+
+def load_cifar10_data():
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)) # Нормалізація для RGB
+    ])
+    cifar10_dataset = CIFAR10(root='./datasets', train=True, download=True, transform=transform)
+    return cifar10_dataset
 
 def load_celeba_data():
     # Трансформації для обробки зображень CelebA
@@ -13,15 +22,7 @@ def load_celeba_data():
         transforms.ToTensor(),
         Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))  # Нормалізація для RGB
     ])
-
-    # Завантаження датасету CelebA
-    celeba_dataset = datasets.CelebA(
-        root='./datasets',
-        split='train',
-        download=True,
-        transform=image_transforms
-    )
-
+    celeba_dataset = datasets.CelebA(root='./datasets', split='train', download=True, transform=image_transforms)
     return celeba_dataset
 
 # Розмиття
@@ -54,7 +55,7 @@ def apply_random_corruption(image):
     else:
         return image
 
-def save_celeba_dataset_csv(dataset, file_path):
+def save_dataset_csv(dataset, file_path):
     images = []
     labels = []
 
@@ -70,9 +71,11 @@ def save_celeba_dataset_csv(dataset, file_path):
 
     # Збереження у CSV
     df.to_csv(file_path, index=False)
-    print(f"Датасет CelebA збережено у файл: {file_path}")
+    print(f"Датасет збережено у файл: {file_path}")
 
-# Завантаження датасету
-training_data = load_celeba_data()
-# Збереження у файл
-save_celeba_dataset_csv(training_data, "../celeba_training_data.csv")
+# Завантаження та збереження датасетівв
+#celeba_training_data = load_celeba_data()
+#save_dataset_csv(celeba_training_data, "../celeba_training_data.csv")
+
+cifar10_training_data  = load_cifar10_data()
+save_dataset_csv(cifar10_training_data, "../cifar10_training_data.csv")
