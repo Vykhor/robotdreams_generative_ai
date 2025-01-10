@@ -94,6 +94,8 @@ for epoch in range(num_epochs):
         loss_real = discriminator_loss_function(output_real, real_labels)
 
         fake_images = generator(damaged_images)
+        fake_images = (fake_images + 1) / 2 # Нормалізація
+
         output_fake = discriminator(fake_images.detach())
         loss_fake = discriminator_loss_function(output_fake, fake_labels)
 
@@ -141,7 +143,12 @@ for epoch in range(num_epochs):
     print(f"[{current_time}] PSNR: {avg_psnr:.2f}  SSIM: {avg_ssim:.4f}")
 
     # Візуалізація порівняння пошкодженого та відновленого зображення
-    if epoch == (num_epochs - 1):
-        plot_comparing(damaged_image=damaged_images[0], restored_image=fake_images[0], real_image=real_images[0])
+    #if epoch == (num_epochs - 1):
+    #   plot_comparing(damaged_image=damaged_images[0], restored_image=fake_images[0], real_image=real_images[0])
+
+# Збереження натренованих моделей
+torch.save(generator.state_dict(), 'generator.pth')
+torch.save(discriminator.state_dict(), 'discriminator.pth')
+print("Моделі збережено у файли: 'generator.pth' та 'discriminator.pth'")
 
 plot(num_epochs=num_epochs, psnr_list=psnr_list,  ssim_list=ssim_list)

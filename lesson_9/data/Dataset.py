@@ -40,6 +40,6 @@ def save_dataset_csv(dataset, file_path):
 #celeba_training_data = load_celeba_data()
 #save_dataset_csv(celeba_training_data, "../celeba_training_data.csv")
 
-test_data, training_data  = load_cifar10_data()
+training_data, test_data  = load_cifar10_data()
 save_dataset_csv(training_data, "../cifar10_training_data.csv")
 save_dataset_csv(test_data, "../cifar10_test_data.csv")
