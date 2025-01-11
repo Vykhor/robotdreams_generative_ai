@@ -37,22 +37,22 @@ for batch in test_loader:
     )
 
     # Додаємо заголовки над першим рядком
-    titles = ["Пошкоджене", "Відновлене", "Оригінальне"]
+    titles = ["Оригінальне", "Пошкоджене", "Відновлене"]
     for col, title in enumerate(titles):
         axes[0, col].set_title(title, fontsize=16)
         axes[0, col].axis('off')  # Прибираємо осі для заголовків
 
     for i in range(batch_size):
-        # Пошкоджене зображення
-        axes[i + 1, 0].imshow(damaged_images[i].permute(1, 2, 0).cpu().numpy().clip(0, 1))
+        # Оригінальне зображення
+        axes[i + 1, 0].imshow(real_images[i].permute(1, 2, 0).cpu().numpy().clip(0, 1))
         axes[i + 1, 0].axis('off')
 
-        # Відновлене зображення
-        axes[i + 1, 1].imshow(restored_images[i].permute(1, 2, 0).cpu().numpy().clip(0, 1))
+        # Пошкоджене зображення
+        axes[i + 1, 1].imshow(damaged_images[i].permute(1, 2, 0).cpu().numpy().clip(0, 1))
         axes[i + 1, 1].axis('off')
 
-        # Оригінальне зображення
-        axes[i + 1, 2].imshow(real_images[i].permute(1, 2, 0).cpu().numpy().clip(0, 1))
+        # Відновлене зображення
+        axes[i + 1, 2].imshow(restored_images[i].permute(1, 2, 0).cpu().numpy().clip(0, 1))
         axes[i + 1, 2].axis('off')
 
     # Налаштування зовнішніх меж
