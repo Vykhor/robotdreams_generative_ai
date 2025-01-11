@@ -1,4 +1,3 @@
-import pandas as pd
 import torch
 from datetime import datetime
 from torch import nn, optim
@@ -19,7 +18,7 @@ print(f"Використовується пристрій: {device}")
 # Параметри завантаження даних
 training_file_path = "./cifar10_training_data.csv"
 test_file_path = "./cifar10_test_data.csv"
-p_batch_size = 32
+p_batch_size = 16
 
 # Створення DataLoader для тренувальних і тестових даних
 train_loader = get_dataloader(training_file_path, p_batch_size, shuffle=True)
@@ -38,8 +37,8 @@ discriminator = create_discriminator(p_negative_slope).to(device)
 
 # Параметри навчання
 num_epochs = 20
-lr_gen = 0.0002
-lr_disc = 0.0001
+lr_gen = 0.0001
+lr_disc = 0.0004
 beta1, beta2 = 0.5, 0.999
 
 # Функції втрат
@@ -67,6 +66,11 @@ print(f"Пошкоджені тестові зображення створен�
 current_time = datetime.now().strftime("%H:%M:%S")
 print(f"[{current_time}] Початок процесу навчання")
 for epoch in range(num_epochs):
+
+    total_loss_g = 0  # Для накопичення втрат генератора
+    total_loss_d = 0  # Для накопичення втрат дискримінатора
+    num_batches = len(train_loader)
+
     for batch in train_loader:
         real_images = batch[0].to(device)
         damaged_images = corrupt_images(real_images)
@@ -90,6 +94,9 @@ for epoch in range(num_epochs):
         loss_d.backward()
         optimizer_d.step()
 
+        # Накопичення втрати дискримінатора
+        total_loss_d += loss_d.item()
+
         # --- Крок 2: Оновлення генератора ---
         optimizer_g.zero_grad()
 
@@ -98,12 +105,19 @@ for epoch in range(num_epochs):
 
         loss_g_rec = generator_loss_function(fake_images, real_images)
 
-        loss_g = loss_g_adv + 100 * loss_g_rec
+        loss_g = loss_g_adv + 50 * loss_g_rec
         loss_g.backward()
         optimizer_g.step()
 
+        # Накопичення втрати генератора
+        total_loss_g += loss_g.item()
+
+    # Розрахунок середніх втрат після епохи
+    avg_loss_g = total_loss_g / num_batches
+    avg_loss_d = total_loss_d / num_batches
+
     current_time = datetime.now().strftime("%H:%M:%S")
-    print(f"[{current_time}] | Епоха [{epoch + 1}/{num_epochs}] завершена. Обчислення метрик.")
+    print(f"[{current_time}] | Епоха [{epoch + 1}/{num_epochs}] завершена. Середня втрата генератора: {avg_loss_g:.4f}, дискримінатора: {avg_loss_d:.4f}.")
 
     # Обчислення метрик після кожної епохи
     psnr_total = 0
