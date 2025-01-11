@@ -1,11 +1,10 @@
 import pandas as pd
 import torch
 from datetime import datetime
-
-from torch.utils.data import DataLoader, TensorDataset
 from torch import nn, optim
 
-from lesson_9.Vizualization import plot, plot_comparing
+from lesson_9.data.Dataloader import get_dataloader
+from lesson_9.plot.Plotter import plot, plot_comparing
 from lesson_9.model.Generator import create_generator
 from lesson_9.model.Discriminator import create_discriminator
 from lesson_9.Metrics import calculate_metrics_on_batch
@@ -16,18 +15,6 @@ device = torch.device(
     "cuda" if torch.cuda.is_available()
     else "cpu")
 print(f"Використовується пристрій: {device}")
-
-def load_dataset_csv(file_path):
-    df = pd.read_csv(file_path)
-    # Завантажуємо всі зображення без обробки стовпця 'label'
-    images = torch.tensor(df.values, dtype=torch.float32).view(-1, 3, 32, 32)
-    print(f"Датасет завантажено з файлу: {file_path}")
-    return TensorDataset(images)
-
-
-def get_dataloader(file_path, batch_size, shuffle):
-    dataset = load_dataset_csv(file_path)
-    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
 
 # Параметри завантаження даних
 training_file_path = "./cifar10_training_data.csv"
