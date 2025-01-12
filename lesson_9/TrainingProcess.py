@@ -18,7 +18,7 @@ print(f"Використовується пристрій: {device}")
 # Параметри завантаження даних
 training_file_path = "./cifar10_training_data.csv"
 test_file_path = "./cifar10_test_data.csv"
-p_batch_size = 16
+p_batch_size = 32
 
 # Створення DataLoader для тренувальних і тестових даних
 train_loader = get_dataloader(training_file_path, p_batch_size, shuffle=True)
@@ -35,11 +35,27 @@ p_negative_slope = 0.2
 generator = create_generator(p_negative_slope).to(device)
 discriminator = create_discriminator(p_negative_slope).to(device)
 
+def weights_init(m):
+    if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d)):
+        nn.init.xavier_uniform_(m.weight)  # Ініціалізація для згорткових шарів
+        if m.bias is not None:
+            nn.init.zeros_(m.bias)
+    elif isinstance(m, nn.BatchNorm2d):
+        nn.init.ones_(m.weight)  # Ініціалізація gamma у BatchNorm
+        nn.init.zeros_(m.bias)  # Ініціалізація beta
+    elif isinstance(m, nn.Linear):
+        nn.init.xavier_uniform_(m.weight)  # Ініціалізація для лінійних шарів
+        nn.init.zeros_(m.bias)
+
+generator.apply(weights_init)
+discriminator.apply(weights_init)
+
 # Параметри навчання
 num_epochs = 20
-lr_gen = 0.0001
-lr_disc = 0.0004
+lr_gen = 0.0002
+lr_disc = 0.000005
 beta1, beta2 = 0.5, 0.999
+p_generator_iterations = 2
 
 # Функції втрат
 discriminator_loss_function = nn.BCELoss()
@@ -65,56 +81,65 @@ print(f"Пошкоджені тестові зображення створен�
 
 current_time = datetime.now().strftime("%H:%M:%S")
 print(f"[{current_time}] Початок процесу навчання")
+
+discriminator.train()
+generator.train()
 for epoch in range(num_epochs):
 
     total_loss_g = 0  # Для накопичення втрат генератора
     total_loss_d = 0  # Для накопичення втрат дискримінатора
     num_batches = len(train_loader)
 
-    for batch in train_loader:
+    for i, (batch) in enumerate(train_loader):
         real_images = batch[0].to(device)
         damaged_images = corrupt_images(real_images)
+        batch_size = real_images.size(0)
 
-        # --- Крок 1: Оновлення дискримінатора ---
-        optimizer_d.zero_grad()
+        if i % 2 == 0:
+            # --- Крок 1: Оновлення дискримінатора ---
+            optimizer_d.zero_grad()
 
-        real_labels = torch.ones(damaged_images.size(0), 1).to(device)
-        fake_labels = torch.zeros(damaged_images.size(0), 1).to(device)
+            real_labels = torch.ones(batch_size, 1).to(device) * 0.9 + torch.rand(batch_size, 1).to(device) * 0.1
+            fake_labels = torch.zeros(batch_size, 1).to(device) + torch.rand(batch_size, 1).to(device) * 0.1
 
-        output_real = discriminator(real_images)
-        loss_real = discriminator_loss_function(output_real, real_labels)
+            output_real = discriminator(real_images)
+            loss_real = discriminator_loss_function(output_real, real_labels)
 
-        fake_images = generator(damaged_images)
-        fake_images = (fake_images + 1) / 2 # Нормалізація
+            fake_images = generator(damaged_images)
 
-        output_fake = discriminator(fake_images.detach())
-        loss_fake = discriminator_loss_function(output_fake, fake_labels)
+            output_fake = discriminator(fake_images.detach())
+            loss_fake = discriminator_loss_function(output_fake, fake_labels)
 
-        loss_d = loss_real + loss_fake
-        loss_d.backward()
-        optimizer_d.step()
+            loss_d = loss_real + loss_fake
+            loss_d.backward()
+            optimizer_d.step()
 
-        # Накопичення втрати дискримінатора
-        total_loss_d += loss_d.item()
+            # Накопичення втрати дискримінатора
+            total_loss_d += loss_d.item()
 
         # --- Крок 2: Оновлення генератора ---
-        optimizer_g.zero_grad()
+        for _ in range(p_generator_iterations):
+            real_labels = torch.ones(batch_size, 1).to(device)
+            fake_labels = torch.zeros(batch_size, 1).to(device)
 
-        output_fake_for_g = discriminator(fake_images)
-        loss_g_adv = discriminator_loss_function(output_fake_for_g, real_labels)
+            optimizer_g.zero_grad()
 
-        loss_g_rec = generator_loss_function(fake_images, real_images)
+            fake_images = generator(damaged_images)
 
-        loss_g = loss_g_adv + 50 * loss_g_rec
-        loss_g.backward()
-        optimizer_g.step()
+            output_fake_for_g = discriminator(fake_images)
+            loss_g_adv = discriminator_loss_function(output_fake_for_g, real_labels)
+            loss_g_rec = generator_loss_function(fake_images, real_images)
 
-        # Накопичення втрати генератора
-        total_loss_g += loss_g.item()
+            loss_g = loss_g_adv + 50 * loss_g_rec
+            loss_g.backward()
+            optimizer_g.step()
+
+            # Накопичення втрати генератора
+            total_loss_g += loss_g.item()
 
     # Розрахунок середніх втрат після епохи
-    avg_loss_g = total_loss_g / num_batches
-    avg_loss_d = total_loss_d / num_batches
+    avg_loss_g = total_loss_g / (num_batches * p_generator_iterations)
+    avg_loss_d = total_loss_d / (num_batches / 2)
 
     current_time = datetime.now().strftime("%H:%M:%S")
     print(f"[{current_time}] | Епоха [{epoch + 1}/{num_epochs}] завершена. Середня втрата генератора: {avg_loss_g:.4f}, дискримінатора: {avg_loss_d:.4f}.")
@@ -148,8 +173,8 @@ for epoch in range(num_epochs):
     #   plot_comparing(damaged_image=damaged_images[0], restored_image=fake_images[0], real_image=real_images[0])
 
 # Збереження натренованих моделей
-torch.save(generator.state_dict(), 'generator.pth')
-torch.save(discriminator.state_dict(), 'discriminator.pth')
+torch.save(generator.state_dict(), 'result/generator.pth')
+torch.save(discriminator.state_dict(), 'result/discriminator.pth')
 print("Моделі збережено у файли: 'generator.pth' та 'discriminator.pth'")
 
 plot(num_epochs=num_epochs, psnr_list=psnr_list,  ssim_list=ssim_list)
